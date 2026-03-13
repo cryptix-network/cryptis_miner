@@ -1,0 +1,243 @@
+# Cryptis Miner default configuration
+# CLI arguments override values from this file.
+# Use these commands to inspect support in your build:
+#   cryptis-miner list-coins
+#   cryptis-miner list-algorithms
+
+# Mining target (set to a coin/hash pair supported by your build)
+coin = "cryptix"
+hash = "ox8"
+
+# Worker/rig label shown in logs and API stats
+worker_name = "worker1"
+
+[pool]
+# Primary stratum endpoint
+url = "stratum+tcp://pool.example.com:3333"
+
+# Optional failover pool list (tried when primary is down)
+# failover_urls = ["stratum+tcp://backup1.example.com:3333", "stratum+ssl://backup2.example.com:443"]
+
+# Stratum protocol version
+stratum_protocol = "v1" # v1|v2
+
+# Transport mode
+transport = "auto" # auto|tcp|tls
+
+# Login identity:
+# - If user != "anonymous", user is sent as pool login.
+# - Else wallet_address is used.
+user = "anonymous"
+wallet_address = "YOUR_WALLET_ADDRESS"
+
+# Optional pool password
+# password = "x"
+
+# Reconnect behavior
+retry_count = 0       # 0 = unlimited
+retry_delay_ms = 5000 # base delay in ms
+
+# Pool timeouts/queues
+connect_timeout_ms = 10000
+tls_handshake_timeout_ms = 10000
+request_timeout_ms = 30000
+job_channel_size = 64
+
+[mining]
+# CPU workers (omit for auto detect)
+# threads = 8
+
+# Optional CPU affinity (one core id per worker)
+# cpu_affinity = [0, 2, 4, 6]
+
+# Optional GPU device whitelist
+# gpu_devices = [0, 1]
+
+# Optional explicit backend routing for mixed rigs
+# cuda_devices = [0]
+# opencl_devices = [1]
+
+# Backend selection preference
+gpu_backend = "auto" # auto|cuda|opencl
+
+# Backend toggles
+cuda_enabled = true
+opencl_enabled = true
+
+# Optional terminal title and one-time startup command
+# terminal_title = "Cryptis Miner"
+# startup_command = "echo preparing mining runtime"
+startup_command_timeout_ms = 15000
+
+# GPU telemetry sensors for API + status board
+gpu_sensors_enabled = true
+
+# Vendor filters for mixed rigs
+disable_gpu_amd = false
+disable_gpu_nvidia = false
+disable_gpu_intel = false
+
+# Optional CPU backend preference for ox8 (when supported)
+# ox8_avx2 = true
+
+# Global intensity fallback
+intensity = 1.0
+
+# Optional per-device-class intensity overrides
+# cpu_intensity = 1.0
+# gpu_intensity = 1.0
+
+# Mode toggles
+no_cpu = false
+no_gpu = false
+
+[mining.overclock]
+# Startup overclock command runner (vendor-aware, backend-neutral)
+enabled = false
+apply_on_start = true
+fail_on_error = false
+command_timeout_ms = 8000
+dry_run = false
+
+# Command templates support placeholders:
+# {id} | {device_id} | {vendor} | {vendor_name} | {backend}
+# commands = ["echo OC generic gpu={id} vendor={vendor_name} backend={backend}"]
+
+# NVIDIA examples (Linux/Windows with nvidia-smi)
+# nvidia_commands = [
+#   "nvidia-smi -pm 1",
+#   "nvidia-smi -i {id} -pl 220",
+#   "nvidia-smi -i {id} -lgc 1500,1500",
+#   "nvidia-smi -i {id} -lmc 810,810"
+# ]
+
+# AMD examples (usually Linux ROCm environments)
+# amd_commands = [
+#   "rocm-smi --setpoweroverdrive 220 --autorespond y",
+#   "rocm-smi --setsclk 5 --autorespond y",
+#   "rocm-smi --setmclk 3 --autorespond y"
+# ]
+
+# Intel examples (Intel GPU tools / i915 environments)
+# intel_commands = [
+#   "intel_gpu_frequency -d {id} -s 2200"
+# ]
+
+[mining.runtime]
+# Intensity clamp applied to effective cpu/gpu intensities
+intensity_min = 0.25
+intensity_max = 8.0
+
+# CPU batch model:
+# effective_cpu_batch = clamp(cpu_hash_batch_base * effective_cpu_intensity, min, max)
+cpu_hash_batch_base = 2048
+cpu_hash_batch_min = 256
+cpu_hash_batch_max = 16384
+
+# Manual CPU batch (used only when cpu_autotune_enabled=false)
+# cpu_batch_size = 4096
+
+# GPU batch model:
+# computed_gpu_batch = clamp(gpu_hash_batch_base * effective_gpu_intensity, min, max)
+gpu_hash_batch_base = 262144
+gpu_hash_batch_min = 32768
+gpu_hash_batch_max = 2097152
+
+# Share submit throttling
+share_submit_per_second = 10.0
+share_submit_burst = 3.0
+share_queue_capacity = 2048
+
+# Recent job window used for stale filtering
+recent_job_max_ids = 64
+recent_job_max_age_ms = 8000
+
+# Main loop intervals
+job_receive_timeout_ms = 500
+stats_interval_ms = 5000
+gpu_status_board_interval_ms = 30000 # 0 disables status board
+
+# Startup autotune toggles
+opencl_autotune_enabled = true
+cpu_autotune_enabled = true
+# CPU autotune probe duration per candidate (ms)
+cpu_autotune_probe_ms = 600
+# GPU autotune runs per (lws,batch) candidate (median score over successful runs)
+gpu_autotune_rounds = 3
+
+# Manual OpenCL launch values (used only when opencl_autotune_enabled=false)
+# opencl_batch_size = 262144
+# opencl_local_work_size = 256
+
+# Shutdown/reconnect timing
+task_drain_timeout_ms = 10000
+shutdown_poll_interval_ms = 100
+reconnect_min_delay_ms = 250
+reconnect_backoff_max_power = 5
+
+# Worker runtime behavior
+worker_idle_sleep_ms = 25
+worker_recv_timeout_ms = 100
+worker_max_work_slice_ms = 100
+worker_slice_check_interval = 64
+worker_active_poll_interval = 64
+worker_stats_flush_threshold = 4194304
+worker_stats_flush_interval_ms = 1000
+
+[api]
+enabled = true
+port = 48673
+bind_address = "127.0.0.1"
+
+# Optional API hardening
+# auth_token = "change-me"
+# allowed_ips = ["127.0.0.1", "::1"]
+# rate_limit_per_minute = 120
+
+# Hive-compatible endpoint
+# Uses the same REST API port as above (path only differs).
+hive_stats_enabled = true
+hive_stats_path = "/hiveos/stats"
+
+[frontend]
+# Built-in HTML dashboard server
+enabled = true
+port = 8943
+bind_address = "127.0.0.1"
+
+# Per-IP request cap (small DoS protection)
+rate_limit_per_minute = 600
+
+# Optional password gate for dashboard/API calls
+password_enabled = false
+# password = "change-me"
+
+[benchmark_telemetry]
+# Optional cloud telemetry features (performance/tuning only, no wallet/private-key secrets).
+enabled = true
+
+# Local persistent reporter id (if write fails, runtime-only id is used).
+id_file = "data/bench-reporter-id"
+
+# Upload cadence + network timeouts.
+interval_seconds = 300
+connect_timeout_ms = 1500
+request_timeout_ms = 2500
+
+# Optional API key for your collector endpoint.
+# api_key = "change-me"
+
+# Device-vs-network benchmark comparison (shown in logs + frontend).
+insights_enabled = true
+
+# How often comparison text is emitted in logs/frontend.
+insights_announce_interval_seconds = 120
+
+# How often fresh benchmark averages are fetched from cloud.
+insights_refresh_interval_seconds = 3600
+
+[logging]
+level = "info"          # trace|debug|info|warn|error
+file = "logs/miner.log" # omit for console-only
+rotate_size_mb = 100
+color_enabled = true
