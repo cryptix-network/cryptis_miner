@@ -2,6 +2,14 @@
 
 Cryptis Miner is a performance-oriented miner designed for real multi-device rigs. It focuses on maximum compatibility across different hardware and platforms, combined with automatic performance optimization.
 
+Website:
+https://cryptis-miner.cryptix-network.org/
+
+Public Benchmarks:
+https://cryptis-miner.cryptix-network.org/bench
+
+Benchmark API:
+https://cryptis-miner.cryptix-network.org/api/v1/overview
 
 ## Currently Supported Targets
 
