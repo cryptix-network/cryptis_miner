@@ -2,8 +2,8 @@
 
 This guide is intentionally short and practical.
 
-> Important: GPU mining in the current public build uses OpenCL.  
-> CUDA support (target: CUDA 12.4) is planned, but CUDA hashing is not active yet in this build.
+> Important: OpenCL is the recommended GPU backend in the current public build.  
+> CUDA can be enabled with `--cuda --cuda-experimental` for testing, but CUDA hashing is not performance-optimized yet.
 
 ## Windows (prebuilt binaries)
 
@@ -11,7 +11,7 @@ This guide is intentionally short and practical.
    https://github.com/cryptix-network/cryptis-miner/releases
 2. Extract the ZIP to a folder (for example `C:\cryptis-miner`).
 3. Install GPU runtime dependencies:
-   - CUDA 12.4 (for future CUDA-enabled builds):  
+   - CUDA 12.4 (optional, for experimental CUDA testing):  
      https://developer.nvidia.com/cuda-12-4-0-download-archive
    - OpenCL runtime (required now): install latest GPU driver
      - NVIDIA: https://www.nvidia.com/Download/index.aspx
@@ -63,7 +63,7 @@ sudo apt install -y ocl-icd-libopencl1 opencl-headers clinfo
 sudo ubuntu-drivers autoinstall
 sudo reboot
 
-# 3) CUDA 12.4 toolkit (optional for future CUDA builds)
+# 3) CUDA 12.4 toolkit (optional for experimental CUDA testing)
 # Ubuntu 22.04 example:
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
@@ -106,7 +106,7 @@ nvidia-driver-update --list
 nvidia-driver-update
 reboot
 
-# Optional CUDA 12.4 toolkit for future CUDA-enabled miner builds
+# Optional CUDA 12.4 toolkit for experimental CUDA testing
 # (usually not needed on HiveOS for current build)
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.1-1_all.deb
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
@@ -147,12 +147,16 @@ Useful keys:
 - `--no-gpu` CPU-only
 - `--gpu-devices` select GPU indexes (example `0,1`)
 - `--gpu-backend opencl` force OpenCL backend
+- `--cuda --cuda-experimental` enable experimental CUDA test path (not performance-optimized yet)
 
 Examples:
 
 ```bash
 # GPU only (recommended with current build)
 ./cryptis-miner mine --coin cryptix --hash ox8 --pool stratum+tcp://POOL:PORT --wallet YOUR_WALLET --worker rig01 --no-cpu --gpu-backend opencl
+
+# Experimental CUDA test run (functional validation only)
+./cryptis-miner mine --coin cryptix --hash ox8 --pool stratum+tcp://POOL:PORT --wallet YOUR_WALLET --worker rig01 --no-cpu --cuda --cuda-experimental
 
 # CPU only
 ./cryptis-miner mine --coin cryptix --hash ox8 --pool stratum+tcp://POOL:PORT --wallet YOUR_WALLET --worker rig01 --no-gpu --threads 6

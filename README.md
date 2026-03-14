@@ -84,7 +84,11 @@ cryptis-miner list-algorithms
 - GPU routing works for mixed rigs via `--gpu-devices`, `--cuda-devices`, and `--opencl-devices`.
 - Inspect detected devices with `cryptis-miner device-inventory`.
 - In `auto` mode, backend selection follows runtime availability.
-- OpenCL hashing is available. CUDA hash path is currently not available in this build.
+- OpenCL hashing is available and recommended for production hashrate right now.
+- CUDA hashing can be enabled for testing with `--cuda-experimental` (usually together with `--cuda`).
+- CUDA experimental mode is currently for validation/testing only; CUDA kernel acceleration/tuning is not finished yet.
+- Default CUDA experimental state is controlled by `CUDA_HASHING_EXPERIMENTAL_ENABLED` in `src/mining/gpu/cuda.rs`; `--cuda-experimental` overrides it at runtime.
+- Mixed rigs can run OpenCL + CUDA together when `cuda_devices` and `opencl_devices` are set to disjoint GPU id lists.
 - Optional benchmark telemetry uploads only performance/tuning metadata (hashrate, efficiency, temperatures, clocks, batch/autotune/backend/OC settings). No wallet/private-key secrets are sent.
 
 ## Frontend
@@ -182,10 +186,13 @@ cryptis-miner <COMMAND> --help
 - `--gpu-batch-max <N>` - GPU batch maximum
 - `--opencl-batch-size <N>` - fixed OpenCL batch override
 - `--opencl-local-work-size <N>` - fixed OpenCL local work size
+- `--cuda-batch-size <N>` - fixed CUDA batch override
+- `--cuda-block-size <N>` - fixed CUDA block size (threads per block)
 
 ### Autotune
 
 - `--opencl-autotune` / `--no-opencl-autotune` - enable or disable OpenCL startup autotune
+- `--cuda-autotune` / `--no-cuda-autotune` - enable or disable CUDA startup autotune
 - `--cpu-autotune` / `--no-cpu-autotune` - enable or disable CPU startup autotune
 - `--cpu-autotune-probe-ms <MS>` - CPU autotune probe duration
 - `--gpu-autotune-rounds <N>` - rounds per GPU candidate (median scoring)
@@ -196,6 +203,8 @@ Autotune behavior:
 - CPU autotune OFF: `cpu_batch_size` is used if set; otherwise defaults are computed.
 - OpenCL autotune ON: startup selects OpenCL launch values automatically.
 - OpenCL autotune OFF: manual OpenCL launch values are used if set.
+- CUDA autotune ON: startup selects CUDA block size and batch size automatically.
+- CUDA autotune OFF: manual CUDA launch values are used if set.
 
 ### Runtime and Queue Control
 
@@ -223,6 +232,7 @@ Autotune behavior:
 
 - `--gpu-backend <auto|cuda|opencl>` - preferred GPU backend
 - `--cuda` / `--no-cuda` - enable CUDA preference or disable CUDA
+- `--cuda-experimental` - enable experimental CUDA hash path at runtime (testing only; not performance-optimized yet)
 - `--opencl` / `--no-opencl` - enable OpenCL preference or disable OpenCL
 
 ### OC Command Runner
