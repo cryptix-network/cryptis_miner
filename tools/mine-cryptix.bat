@@ -13,21 +13,10 @@ set COIN=cryptix
 set HASH=ox8
 set THREADS=
 
-set BIN=%~dp0cryptix.exe
-if not exist "%BIN%" set BIN=%~dp0cryptis-miner.exe
-
-if not exist "%BIN%" (
-    echo [ERROR] Binary not found. Expected one of:
-    echo   %~dp0cryptix.exe
-    echo   %~dp0cryptis-miner.exe
-    pause
-    exit /b 1
-)
-
 if "%THREADS%"=="" (
-    "%BIN%" --pool %POOL_URL% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --coin %COIN% --hash %HASH% --no-cpu
+    cryptis-miner.exe --pool %POOL_URL% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --coin %COIN% --hash %HASH% --no-cpu
 ) else (
-    "%BIN%" --pool %POOL_URL% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --threads %THREADS% --coin %COIN% --hash %HASH% --no-cpu
+    cryptis-miner.exe --pool %POOL_URL% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --threads %THREADS% --coin %COIN% --hash %HASH% --no-cpu
 )
 
 pause
