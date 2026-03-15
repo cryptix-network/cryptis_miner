@@ -23,6 +23,8 @@ stratum_protocol = "v1" # v1|v2
 
 # Transport mode
 transport = "auto" # auto|tcp|tls
+# Try opposite transport if the first connect attempt fails
+transport_fallback = true
 
 # Login identity:
 # - If user != "anonymous", user is sent as pool login.
@@ -40,6 +42,8 @@ retry_delay_ms = 5000 # base delay in ms
 # Pool timeouts/queues
 connect_timeout_ms = 10000
 tls_handshake_timeout_ms = 10000
+# WARNING: false disables TLS certificate + hostname checks (insecure, but compatible with self-signed endpoints)
+tls_verify_cert = false
 request_timeout_ms = 30000
 job_channel_size = 64
 
@@ -159,6 +163,7 @@ gpu_status_board_interval_ms = 30000 # 0 disables status board
 
 # Startup autotune toggles
 opencl_autotune_enabled = true
+cuda_autotune_enabled = true
 cpu_autotune_enabled = true
 # CPU autotune probe duration per candidate (ms)
 cpu_autotune_probe_ms = 600
@@ -168,6 +173,10 @@ gpu_autotune_rounds = 3
 # Manual OpenCL launch values (used only when opencl_autotune_enabled=false)
 # opencl_batch_size = 262144
 # opencl_local_work_size = 256
+
+# Manual CUDA launch values (used only when cuda_autotune_enabled=false)
+# cuda_batch_size = 262144
+# cuda_block_size = 256
 
 # Shutdown/reconnect timing
 task_drain_timeout_ms = 10000
