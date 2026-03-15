@@ -355,3 +355,7 @@ cryptis-miner config validate --file myconfig.toml
 ```
 
 #### Cryptis Miner does not allow mining on rplant.xyz (including subdomains/server IPs) due to ethical concerns regarding the operators. The software will terminate immediately upon startup; mining on the Rplant pool is not possible, but mining on all other pools is.
+
+## Support 
+Support in Cryptix Network Discord (Crypto Miner Channel):
+https://discord.cryptix-network.org/
