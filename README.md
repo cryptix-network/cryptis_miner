@@ -144,10 +144,12 @@ cryptis-miner <COMMAND> --help
 - `-p, --pool <URL>` - pool URL (`stratum+tcp://...` or `stratum+ssl://...`)
 - `--stratum-protocol <v1|v2>` - Stratum protocol version
 - `--stratum-transport <auto|tcp|tls>` - transport mode
+- `--stratum-transport-fallback` / `--no-stratum-transport-fallback` - try TCP<->TLS fallback when connect/handshake fails
 - `--pool-retry-count <N>` - reconnect attempts (`0` = unlimited)
 - `--pool-retry-delay-ms <MS>` - reconnect base delay
 - `--pool-connect-timeout-ms <MS>` - TCP connect timeout
 - `--pool-tls-timeout-ms <MS>` - TLS handshake timeout
+- `--pool-tls-verify-cert` / `--pool-tls-no-verify-cert` - enable or disable TLS certificate+hostname verification
 - `--pool-request-timeout-ms <MS>` - Stratum request timeout
 - `--pool-job-channel-size <N>` - internal pool job queue size
 
