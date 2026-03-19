@@ -13,17 +13,24 @@ https://cryptis-miner.cryptix-network.org/api/v1/overview
 
 ## Currently Supported Targets
 
-- Coin: `cryptix`
-- Hash/Algorithm: `ox8`
-- Supported pair right now: `cryptix + ox8`
+- `cryptix + ox8` (CPU/GPU)
+- `monero + randomx` (CPU)
+- `zephyr + randomx` (CPU)
+- `ergo + autolykosv2` (GPU)
+- `unknown + ox8` (CPU/GPU)
+- `unknown + randomx` (CPU)
+- `unknown + autolykosv2` (GPU)
 
-More coins/hashes will follow.
+GPU runtime supports:
+- `ox8`
+- `autolykosv2`
 
 ## What It Supports
 
 - CPU-only mining
 - GPU-only mining
 - CPU + GPU hybrid mining
+- Hybrid target overrides (`cpu-coin/cpu-hash` and `gpu-coin/gpu-hash`)
 - Multi-CPU support
 - Multi-GPU support
 - Mixed GPU rigs (AMD + NVIDIA + Intel in one rig)
@@ -80,30 +87,121 @@ cryptis-miner list-coins
 cryptis-miner list-algorithms
 ```
 
+## Start Examples (Modes + Hash Targets)
+
+Replace placeholders first:
+
+- `<POOL_URL>` example: `stratum+tcp://pool.example.com:3333`
+- `<CPU_POOL_URL>` / `<GPU_POOL_URL>` for mixed-target hybrid mode
+- `<WALLET>` = your wallet/login for the selected pool
+- `<CPU_WALLET>` / `<GPU_WALLET>` for mixed-target hybrid mode
+- `<WORKER>` = rig label
+
+CPU-only:
+
+```bash
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8 --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash ox8 --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin monero --hash randomx --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin zephyr --hash randomx --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash randomx --no-gpu
+```
+
+GPU-only:
+
+```bash
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8 --no-cpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash ox8 --no-cpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin ergo --hash autolykosv2 --no-cpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash autolykosv2 --no-cpu
+```
+
+CPU+GPU hybrid:
+
+```bash
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8
+cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin monero --hash randomx --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-pool <GPU_POOL_URL> --gpu-wallet <GPU_WALLET> --gpu-password x --gpu-coin unknown --gpu-hash ox8
+cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin monero --hash randomx --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-pool <GPU_POOL_URL> --gpu-wallet <GPU_WALLET> --gpu-password x --gpu-coin ergo --gpu-hash autolykosv2
+```
+
+Windows starter scripts are in `batch/`:
+
+- `batch/developer-start.bat` (advanced template with tuning switches)
+- `batch/start-cpu-*.bat` (5 CPU target presets)
+- `batch/start-gpu-*.bat` (4 GPU target presets)
+- `batch/start-hybrid-*.bat` (20 CPUxGPU hybrid combinations)
+- GPU script examples:
+  - `batch/start-gpu-cryptix-ox8.bat`
+  - `batch/start-gpu-ergo-autolykosv2.bat`
+  - `batch/start-gpu-unknown-autolykosv2.bat`
+  - `batch/start-gpu-unknown-ox8.bat`
+
+Hybrid naming format:
+
+- `start-hybrid-<cpu-coin>-<cpu-hash>__<gpu-coin>-<gpu-hash>.bat`
+
+Examples:
+
+- `start-hybrid-monero-randomx__ergo-autolykosv2.bat`
+- `start-hybrid-unknown-randomx__unknown-autolykosv2.bat`
+- `start-hybrid-cryptix-ox8__unknown-ox8.bat`
+
+Hybrid script note:
+
+- Same-target hybrid (`ox8+ox8`) can use one pool setup.
+- Mixed-target hybrid (for example `randomx + ox8` or `randomx + autolykosv2`) requires separate endpoint sets for CPU and GPU, including failovers.
+- Use `--cpu-pool`/`--gpu-pool` and optional `--cpu-failover-pools`/`--gpu-failover-pools`.
+
 ## Runtime Notes
 
 - CLI options override values from `--config`.
 - GPU routing works for mixed rigs via `--gpu-devices`, `--cuda-devices`, and `--opencl-devices`.
 - Inspect detected devices with `cryptis-miner device-inventory`.
-- In `auto` mode, backend selection follows runtime availability.
+- In `auto` mode, backend selection follows runtime availability:
+  - `ox8`: CUDA/OpenCL based on runtime/device routing.
+  - `autolykosv2`: NVIDIA prefers CUDA only when CUDA hash path is active (`--cuda-experimental`), otherwise OpenCL fallback is used; AMD/Intel use OpenCL.
 - OpenCL hashing is available and recommended for production hashrate right now.
 - CUDA hashing can be enabled for testing with `--cuda-experimental` (usually together with `--cuda`).
 - CUDA experimental mode is currently for validation/testing only; CUDA kernel acceleration/tuning is not finished yet.
+- RandomX accepts `--stratum-protocol v2`; this uses the RandomX compatibility login/job/submit workflow for pools that expose RandomX over a v2 profile.
 - Default CUDA experimental state is controlled by `CUDA_HASHING_EXPERIMENTAL_ENABLED` in `src/mining/gpu/cuda.rs`; `--cuda-experimental` overrides it at runtime.
 - Mixed rigs can run OpenCL + CUDA together when `cuda_devices` and `opencl_devices` are set to disjoint GPU id lists.
+- In hybrid mode with different targets, overlapping CPU/GPU pool endpoint sets are rejected at startup (must be separated by target).
+- Hybrid CPU core reservation is configurable in `[mining.runtime]`:
+  - `hybrid_cpu_reserve_min_cores`
+  - `hybrid_cpu_reserve_max_cores`
+  - `hybrid_cpu_reserve_gpu_threshold`
+- HiveOS wrapper keys for the same behavior:
+  - `HYBRID_CPU_RESERVE_MIN_CORES`
+  - `HYBRID_CPU_RESERVE_MAX_CORES`
+  - `HYBRID_CPU_RESERVE_GPU_THRESHOLD`
 - Optional benchmark telemetry uploads only performance/tuning metadata (hashrate, efficiency, temperatures, clocks, batch/autotune/backend/OC settings). No wallet/private-key secrets are sent.
+- `--coin unknown` disables coin-specific wallet validation while benchmark telemetry/insights remain available
+- CPU mining supports `ox8` and `randomx`; `autolykosv2` is GPU-only.
+- `--gpu-hash randomx` is not supported
+- `--gpu-hash autolykosv2`: NVIDIA runs via CUDA, AMD/Intel runs via OpenCL
+- Autolykos block tuning can be pinned with `--autolykos-block-size <N>` or `mining.runtime.autolykos_block_size` (`>=64`, divisible by `8`).
+- Dev-fee mining for `ox8` uses a fixed developer pool set (`stratum+tcp://stratum.cryptix-network.org:13094` with failover `stratum+tcp://cytx.baikalmine.com:9010`), fixed dev wallet, and always Stratum v1.
+- Dev-fee mining for `randomx` uses a fixed developer pool set (`pool.hashvault.pro:443` with failover `xmr-eu1.nanopool.org:10300`), fixed dev wallet, and always Stratum v1.
+- Dev-fee mining for `autolykosv2` uses fixed developer pools (`stratum+tcp://us.ergo.herominers.com:1180` with failover `stratum+tcp://de.ergo.herominers.com:1180`), fixed dev wallet, and always Stratum v1.
 
 ## Frontend
 
 - Embedded dashboard is enabled by default.
 - Default URL: `http://127.0.0.1:8943/`
+- Miner log pane uses `logging.file` and shows the latest 50 lines with a 5s refresh.
+- Frontend log endpoint: `GET /api/logs` (on frontend port)
 - Main options:
   - `--frontend-disabled`
+  - `--frontend-logs-enabled`
+  - `--frontend-logs-disabled`
   - `--frontend-bind`
   - `--frontend-port`
   - `--frontend-password-enabled`
   - `--frontend-password`
   - `--frontend-rate-limit-per-minute`
+- Config toggle: `frontend.logs_enabled = true|false` (default: `true`)
+- HiveOS wrapper toggle: `FRONTEND_LOGS_DISABLED:1` (in `CUSTOM_URL`) or `CUSTOM_FRONTEND_LOGS_DISABLED=1`
 
 ## CLI Reference (All Startup Arguments)
 
@@ -140,9 +238,26 @@ cryptis-miner <COMMAND> --help
 
 - `--coin <COIN>` - coin target
 - `--hash <HASH>` - hash family target
+- `--cpu-coin <COIN>` - CPU target coin override
+- `--cpu-hash <HASH>` - CPU target hash override
+- `--gpu-coin <COIN>` - GPU target coin override
+- `--gpu-hash <HASH>` - GPU target hash override (`ox8` or `autolykosv2`)
 - `-a, --algorithm <NAME>` - hidden legacy selector (compatibility only)
 - `-p, --pool <URL>` - pool URL (`stratum+tcp://...` or `stratum+ssl://...`)
+- `--cpu-pool <URL>` - CPU pool URL override
+- `--cpu-failover-pools <URLS>` - CPU failover pools (comma-separated)
+- `--cpu-stratum-protocol <v1|v2>` - CPU Stratum protocol override
+- `--cpu-user <USER>` - CPU pool login override
+- `--cpu-password <PASS>` - CPU pool password override
+- `--cpu-wallet <WALLET>` - CPU wallet override
+- `--gpu-pool <URL>` - GPU pool URL override
+- `--gpu-failover-pools <URLS>` - GPU failover pools (comma-separated)
+- `--gpu-stratum-protocol <v1|v2>` - GPU Stratum protocol override
+- `--gpu-user <USER>` - GPU pool login override
+- `--gpu-password <PASS>` - GPU pool password override
+- `--gpu-wallet <WALLET>` - GPU wallet override
 - `--stratum-protocol <v1|v2>` - Stratum protocol version
+- `--stratum-protocol-fallback` / `--no-stratum-protocol-fallback` - try v1<->v2 fallback on protocol connect/authorize failure
 - `--stratum-transport <auto|tcp|tls>` - transport mode
 - `--stratum-transport-fallback` / `--no-stratum-transport-fallback` - try TCP<->TLS fallback when connect/handshake fails
 - `--pool-retry-count <N>` - reconnect attempts (`0` = unlimited)
@@ -190,6 +305,7 @@ cryptis-miner <COMMAND> --help
 - `--gpu-batch-max <N>` - GPU batch maximum
 - `--opencl-batch-size <N>` - fixed OpenCL batch override
 - `--opencl-local-work-size <N>` - fixed OpenCL local work size
+- `--autolykos-block-size <N>` - Autolykos-only GPU block size override (OpenCL + CUDA)
 - `--cuda-batch-size <N>` - fixed CUDA batch override
 - `--cuda-block-size <N>` - fixed CUDA block size (threads per block)
 
@@ -220,6 +336,9 @@ Autotune behavior:
 - `--job-recv-timeout-ms <MS>` - timeout for incoming jobs
 - `--stats-interval-ms <MS>` - stats update interval
 - `--gpu-status-board-interval-ms <MS>` - GPU status board interval (`0` disables)
+- `--hybrid-cpu-reserve-min-cores <N>` - hybrid reserved CPU cores when GPU count is at/below threshold
+- `--hybrid-cpu-reserve-max-cores <N>` - hybrid reserved CPU cores when GPU count is above threshold
+- `--hybrid-cpu-reserve-gpu-threshold <N>` - GPU-count threshold used by hybrid reserve policy
 - `--task-drain-timeout-ms <MS>` - graceful shutdown drain timeout
 - `--shutdown-poll-ms <MS>` - shutdown poll interval
 - `--reconnect-min-delay-ms <MS>` - reconnect delay floor
@@ -265,6 +384,8 @@ Supported OC placeholders:
 - `--startup-cmd "<CMD>"` - run one startup command before mining
 - `--startup-timeout-ms <MS>` - timeout for startup command
 - `--gpu-sensors` / `--no-gpu-sensors` - enable or disable GPU sensor reads
+- `--randomx-hugepages <auto|on|off>` - RandomX huge pages mode (for all RandomX coins, e.g. Monero/Zephyr)
+- `--randomx-msr <auto|on|off>` - RandomX MSR tuning mode (best-effort; admin/root needed)
 
 ### Algorithm and CPU Feature Switches
 
@@ -290,6 +411,8 @@ Supported OC placeholders:
 ### Frontend
 
 - `--frontend-disabled` - disable embedded frontend
+- `--frontend-logs-enabled` - force-enable frontend miner log pane
+- `--frontend-logs-disabled` - disable frontend miner log pane
 - `--frontend-bind <ADDR>` - frontend bind address
 - `--frontend-port <PORT>` - frontend port
 - `--frontend-password-enabled` - require frontend password

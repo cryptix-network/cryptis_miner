@@ -123,6 +123,18 @@ Use a Custom miner entry and pass config in `CUSTOM_URL` style. Example:
 POOL:stratum+tcp://POOL:PORT,TEMPLATE:YOUR_WALLET.rig01,PASS:x,COIN:cryptix,HASH:ox8,GPU_BACKEND:opencl,NO_CPU:1
 ```
 
+RandomX CPU-only example:
+
+```text
+POOL:stratum+tcp://RANDOMX_POOL:PORT,TEMPLATE:YOUR_MONERO_WALLET.rig01,PASS:x,COIN:monero,HASH:randomx,NO_GPU:1
+```
+
+Hybrid mixed-target example (CPU RandomX + GPU ox8 with separate pools):
+
+```text
+POOL:stratum+tcp://RANDOMX_POOL:PORT,TEMPLATE:CPU_WALLET.rig01,PASS:x,COIN:monero,HASH:randomx,GPU_COIN:unknown,GPU_HASH:ox8,CPU_POOL:stratum+tcp://RANDOMX_POOL:PORT,GPU_POOL:stratum+tcp://OX8_POOL:PORT,GPU_WALLET:GPU_WALLET
+```
+
 HiveOS mode flags:
 - GPU-only: `NO_CPU:1`
 - CPU-only: `NO_GPU:1`
@@ -131,17 +143,34 @@ HiveOS mode flags:
 Useful keys:
 - `POOL`, `TEMPLATE`, `PASS`
 - `COIN`, `HASH`
+- `CPU_COIN`, `CPU_HASH`, `GPU_COIN`, `GPU_HASH`
+- `CPU_POOL`, `CPU_FAILOVER_POOLS`, `CPU_USER`, `CPU_PASSWORD`, `CPU_WALLET`
+- `GPU_POOL`, `GPU_FAILOVER_POOLS`, `GPU_USER`, `GPU_PASSWORD`, `GPU_WALLET`
 - `NO_CPU`, `NO_GPU`
 - `GPU_BACKEND` (`opencl` recommended for current build)
 - `GPU_DEVICES` (for example `0,1`)
+- `HYBRID_CPU_RESERVE_MIN_CORES` (reserved CPU cores for hybrid when GPU count is small)
+- `HYBRID_CPU_RESERVE_MAX_CORES` (reserved CPU cores for hybrid when GPU count is large)
+- `HYBRID_CPU_RESERVE_GPU_THRESHOLD` (GPU-count switch threshold for min/max reserve)
+- `FRONTEND_LOGS_DISABLED` (`1` disables frontend log pane, default `0`)
+- `AUTOLYKOS_BLOCK_SIZE` (Autolykos-only GPU block size; `>=64`, divisible by `8`)
+
+Supported coin/hash pairs in HiveOS wrapper:
+- `cryptix + ox8`
+- `monero + randomx`
+- `zephyr + randomx`
+- `unknown + ox8`
+- `unknown + randomx`
 
 ## Quick start arguments (most important)
 
 - `--pool` pool URL
 - `--wallet` wallet address
 - `--worker` worker name
-- `--coin` currently `cryptix`
-- `--hash` currently `ox8`
+- `--coin` one of `cryptix`, `monero`, `zephyr`, `unknown`
+- `--hash` one of `ox8`, `randomx`
+- `--cpu-coin`, `--cpu-hash`, `--gpu-coin`, `--gpu-hash`
+- `--cpu-pool`, `--cpu-failover-pools`, `--gpu-pool`, `--gpu-failover-pools`
 - `--threads` CPU threads
 - `--no-cpu` GPU-only
 - `--no-gpu` CPU-only
@@ -160,4 +189,10 @@ Examples:
 
 # CPU only
 ./cryptis-miner mine --coin cryptix --hash ox8 --pool stratum+tcp://POOL:PORT --wallet YOUR_WALLET --worker rig01 --no-gpu --threads 6
+
+# CPU RandomX
+./cryptis-miner mine --coin monero --hash randomx --pool stratum+tcp://RANDOMX_POOL:PORT --wallet YOUR_MONERO_WALLET --worker rig01 --no-gpu
+
+# Hybrid mixed target (CPU RandomX + GPU ox8)
+./cryptis-miner mine --coin monero --hash randomx --pool stratum+tcp://RANDOMX_POOL:PORT --wallet CPU_WALLET --worker rig01 --cpu-pool stratum+tcp://RANDOMX_POOL:PORT --gpu-pool stratum+tcp://OX8_POOL:PORT --gpu-wallet GPU_WALLET --gpu-coin unknown --gpu-hash ox8
 ```

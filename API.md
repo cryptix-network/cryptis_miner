@@ -13,6 +13,8 @@ Notes:
 - Hive stats use the **same REST port** as the main REST API.
 - REST API supports `GET` only.
 - Frontend server supports `GET` and `POST` (`/login`, `/logout`).
+- Active target values in payloads (for example `algo`) can be `cryptix-ox8`, `randomx`, or `autolykosv2`.
+- Hive-compatible `khs` values are normalized from H/s for every supported algorithm.
 
 ## 2) Security and Access
 
@@ -40,6 +42,7 @@ Configured in `[frontend]`:
 - `password_enabled`
 - `password`
 - `rate_limit_per_minute`
+- `logs_enabled` (controls `/api/logs` visibility; also requires `logging.file`)
 
 If password mode is enabled:
 - `POST /login` with `{"password":"..."}` sets an auth cookie
@@ -69,6 +72,7 @@ If password mode is enabled:
 - `GET /api/system` -> system snapshot
 - `GET /api/devices` -> devices snapshot
 - `GET /api/hive` -> hive snapshot
+- `GET /api/logs` -> frontend log snapshot (last 50 lines, 5s refresh hint)
 
 Extra frontend routes:
 - `POST /login`
@@ -289,6 +293,10 @@ Notes:
   }
 }
 ```
+
+Notes:
+- `stats.algo` reflects the currently active mining target (for example `autolykosv2` on Ergo GPU mining).
+- In hybrid mode, total values include both CPU and GPU contributions.
 
 ## 5) Error Format
 
