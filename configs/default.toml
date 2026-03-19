@@ -4,7 +4,18 @@
 #   cryptis-miner list-coins
 #   cryptis-miner list-algorithms
 
-# Mining target (set to a coin/hash pair supported by your build)
+# Mining target (global default)
+# Supported coin/hash pairs:
+# - cryptix + ox8
+# - monero + randomx
+# - zephyr + randomx
+# - ergo + autolykosv2
+# - unknown + ox8
+# - unknown + randomx
+# - unknown + autolykosv2
+# coin="unknown" enables generic hash-only mode:
+# - wallet address validation is disabled
+# - benchmark telemetry uploads and insights remain available
 coin = "cryptix"
 hash = "ox8"
 
@@ -20,6 +31,8 @@ url = "stratum+tcp://pool.example.com:3333"
 
 # Stratum protocol version
 stratum_protocol = "v1" # v1|v2
+# Try the other Stratum protocol if connect/authorize fails
+protocol_fallback = true
 
 # Transport mode
 transport = "auto" # auto|tcp|tls
@@ -65,6 +78,10 @@ job_channel_size = 64
 gpu_backend = "auto" # auto|cuda|opencl
 
 # Backend toggles
+# Note for Autolykos:
+# - CUDA hash path is experimental and requires --cuda-experimental at startup.
+# - In auto mode, NVIDIA prefers CUDA only when that path is active; otherwise OpenCL fallback is used.
+# - AMD/Intel Autolykos runs via OpenCL.
 cuda_enabled = true
 opencl_enabled = true
 
@@ -84,6 +101,11 @@ disable_gpu_intel = false
 # Optional CPU backend preference for ox8 (when supported)
 # ox8_avx2 = true
 
+# RandomX huge pages mode (applies to all RandomX coins, e.g. Monero/Zephyr)
+randomx_hugepages = "auto" # auto|on|off
+# RandomX MSR mode (best-effort, requires admin/root privileges)
+randomx_msr = "auto" # auto|on|off
+
 # Global intensity fallback
 intensity = 1.0
 
@@ -94,6 +116,43 @@ intensity = 1.0
 # Mode toggles
 no_cpu = false
 no_gpu = false
+
+# Optional per-device target overrides (fallback to global coin/hash)
+# Example hybrid RandomX CPU + ox8 GPU:
+# cpu_coin = "monero"
+# cpu_hash = "randomx"
+# gpu_coin = "unknown"
+# gpu_hash = "ox8"
+# Example hybrid RandomX CPU + Autolykos GPU:
+# cpu_coin = "monero"
+# cpu_hash = "randomx"
+# gpu_coin = "ergo"
+# gpu_hash = "autolykosv2"
+# Note: GPU supports both ox8 and autolykosv2.
+# cpu_coin = "cryptix"
+# cpu_hash = "ox8"
+# gpu_coin = "cryptix"
+# gpu_hash = "ox8"
+
+# Optional per-device pool overrides.
+# Use this when CPU/GPU mine different targets and require different pool endpoints.
+# Each override inherits missing fields from [pool].
+#
+# [mining.cpu_pool]
+# url = "stratum+tcp://randomx-pool.example.com:3333"
+# failover_urls = ["stratum+tcp://randomx-backup.example.com:3333"]
+# stratum_protocol = "v1"
+# user = "anonymous"
+# wallet_address = "YOUR_CPU_WALLET"
+# password = "x"
+#
+# [mining.gpu_pool]
+# url = "stratum+tcp://ox8-pool.example.com:4444"
+# failover_urls = ["stratum+tcp://ox8-backup.example.com:4444"]
+# stratum_protocol = "v2"
+# user = "anonymous"
+# wallet_address = "YOUR_GPU_WALLET"
+# password = "x"
 
 [mining.overclock]
 # Startup overclock command runner (vendor-aware, backend-neutral)
@@ -161,6 +220,13 @@ job_receive_timeout_ms = 500
 stats_interval_ms = 5000
 gpu_status_board_interval_ms = 30000 # 0 disables status board
 
+# Hybrid CPU reservation policy:
+# If gpu_count <= threshold => reserve min cores, else reserve max cores.
+# Final reserve is clamped so at least 1 CPU thread remains active.
+hybrid_cpu_reserve_min_cores = 1
+hybrid_cpu_reserve_max_cores = 2
+hybrid_cpu_reserve_gpu_threshold = 4
+
 # Startup autotune toggles
 opencl_autotune_enabled = true
 cuda_autotune_enabled = true
@@ -173,6 +239,10 @@ gpu_autotune_rounds = 3
 # Manual OpenCL launch values (used only when opencl_autotune_enabled=false)
 # opencl_batch_size = 262144
 # opencl_local_work_size = 256
+
+# Autolykos-only GPU block size override (OpenCL + CUDA for Autolykos kernels).
+# Must be >= 64 and divisible by 8. If omitted, default is 64.
+# autolykos_block_size = 64
 
 # Manual CUDA launch values (used only when cuda_autotune_enabled=false)
 # cuda_batch_size = 262144
@@ -216,6 +286,10 @@ bind_address = "127.0.0.1"
 
 # Per-IP request cap (small DoS protection)
 rate_limit_per_minute = 600
+
+# Show log pane in frontend when logging.file is configured.
+# Set to false to disable frontend log view separately.
+logs_enabled = true
 
 # Optional password gate for dashboard/API calls
 password_enabled = false
