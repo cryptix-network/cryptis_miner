@@ -36,6 +36,10 @@ is_true() {
   [[ "${value}" == "1" || "${value}" == "true" || "${value}" == "yes" || "${value}" == "on" ]]
 }
 
+if [[ -n "${API_TOKEN:-}" ]]; then
+  command+=(--api-token "${API_TOKEN}")
+fi
+
 if [[ -n "${STRATUM_PROTOCOL_FALLBACK:-}" ]]; then
   if is_true "${STRATUM_PROTOCOL_FALLBACK}"; then
     command+=(--stratum-protocol-fallback)
@@ -46,6 +50,8 @@ fi
 
 effective_cpu_user="${CPU_USER:-}"
 effective_gpu_user="${GPU_USER:-}"
+effective_gpu_core_user="${GPU_CORE_USER:-}"
+effective_gpu_memory_user="${GPU_MEMORY_USER:-}"
 if [[ -z "${effective_cpu_user}" && -n "${CPU_WALLET:-}" && -n "${POOL_USER:-}" ]]; then
   if [[ "${POOL_USER,,}" != "anonymous" ]]; then
     effective_cpu_user="${CPU_WALLET}"
@@ -54,6 +60,16 @@ fi
 if [[ -z "${effective_gpu_user}" && -n "${GPU_WALLET:-}" && -n "${POOL_USER:-}" ]]; then
   if [[ "${POOL_USER,,}" != "anonymous" ]]; then
     effective_gpu_user="${GPU_WALLET}"
+  fi
+fi
+if [[ -z "${effective_gpu_core_user}" && -n "${GPU_CORE_WALLET:-}" && -n "${POOL_USER:-}" ]]; then
+  if [[ "${POOL_USER,,}" != "anonymous" ]]; then
+    effective_gpu_core_user="${GPU_CORE_WALLET}"
+  fi
+fi
+if [[ -z "${effective_gpu_memory_user}" && -n "${GPU_MEMORY_WALLET:-}" && -n "${POOL_USER:-}" ]]; then
+  if [[ "${POOL_USER,,}" != "anonymous" ]]; then
+    effective_gpu_memory_user="${GPU_MEMORY_WALLET}"
   fi
 fi
 
@@ -80,6 +96,9 @@ fi
 if [[ -n "${GPU_BACKEND:-}" ]]; then
   command+=(--gpu-backend "${GPU_BACKEND}")
 fi
+if [[ -n "${CUDA_EXPERIMENTAL:-}" ]] && is_true "${CUDA_EXPERIMENTAL}"; then
+  command+=(--cuda-experimental)
+fi
 
 if [[ -n "${CPU_COIN:-}" ]]; then
   command+=(--cpu-coin "${CPU_COIN}")
@@ -95,6 +114,22 @@ fi
 
 if [[ -n "${GPU_HASH:-}" ]]; then
   command+=(--gpu-hash "${GPU_HASH}")
+fi
+
+if [[ -n "${GPU_CORE_COIN:-}" ]]; then
+  command+=(--gpu-core-coin "${GPU_CORE_COIN}")
+fi
+
+if [[ -n "${GPU_CORE_HASH:-}" ]]; then
+  command+=(--gpu-core-hash "${GPU_CORE_HASH}")
+fi
+
+if [[ -n "${GPU_MEMORY_COIN:-}" ]]; then
+  command+=(--gpu-memory-coin "${GPU_MEMORY_COIN}")
+fi
+
+if [[ -n "${GPU_MEMORY_HASH:-}" ]]; then
+  command+=(--gpu-memory-hash "${GPU_MEMORY_HASH}")
 fi
 
 if [[ -n "${RANDOMX_HUGEPAGES:-}" ]]; then
@@ -153,6 +188,54 @@ if [[ -n "${GPU_WALLET:-}" ]]; then
   command+=(--gpu-wallet "${GPU_WALLET}")
 fi
 
+if [[ -n "${GPU_CORE_POOL:-}" ]]; then
+  command+=(--gpu-core-pool "${GPU_CORE_POOL}")
+fi
+
+if [[ -n "${GPU_CORE_FAILOVER_POOLS:-}" ]]; then
+  command+=(--gpu-core-failover-pools "${GPU_CORE_FAILOVER_POOLS}")
+fi
+
+if [[ -n "${GPU_CORE_STRATUM_PROTOCOL:-}" ]]; then
+  command+=(--gpu-core-stratum-protocol "${GPU_CORE_STRATUM_PROTOCOL}")
+fi
+
+if [[ -n "${effective_gpu_core_user:-}" ]]; then
+  command+=(--gpu-core-user "${effective_gpu_core_user}")
+fi
+
+if [[ -n "${GPU_CORE_PASSWORD:-}" ]]; then
+  command+=(--gpu-core-password "${GPU_CORE_PASSWORD}")
+fi
+
+if [[ -n "${GPU_CORE_WALLET:-}" ]]; then
+  command+=(--gpu-core-wallet "${GPU_CORE_WALLET}")
+fi
+
+if [[ -n "${GPU_MEMORY_POOL:-}" ]]; then
+  command+=(--gpu-memory-pool "${GPU_MEMORY_POOL}")
+fi
+
+if [[ -n "${GPU_MEMORY_FAILOVER_POOLS:-}" ]]; then
+  command+=(--gpu-memory-failover-pools "${GPU_MEMORY_FAILOVER_POOLS}")
+fi
+
+if [[ -n "${GPU_MEMORY_STRATUM_PROTOCOL:-}" ]]; then
+  command+=(--gpu-memory-stratum-protocol "${GPU_MEMORY_STRATUM_PROTOCOL}")
+fi
+
+if [[ -n "${effective_gpu_memory_user:-}" ]]; then
+  command+=(--gpu-memory-user "${effective_gpu_memory_user}")
+fi
+
+if [[ -n "${GPU_MEMORY_PASSWORD:-}" ]]; then
+  command+=(--gpu-memory-password "${GPU_MEMORY_PASSWORD}")
+fi
+
+if [[ -n "${GPU_MEMORY_WALLET:-}" ]]; then
+  command+=(--gpu-memory-wallet "${GPU_MEMORY_WALLET}")
+fi
+
 if [[ -n "${INTENSITY:-}" ]]; then
   command+=(--intensity "${INTENSITY}")
 fi
@@ -171,6 +254,14 @@ fi
 
 if [[ -n "${GPU_INTENSITY:-}" ]]; then
   command+=(--gpu-intensity "${GPU_INTENSITY}")
+fi
+
+if [[ -n "${GPU_CORE_INTENSITY:-}" ]]; then
+  command+=(--gpu-core-intensity "${GPU_CORE_INTENSITY}")
+fi
+
+if [[ -n "${GPU_MEMORY_INTENSITY:-}" ]]; then
+  command+=(--gpu-memory-intensity "${GPU_MEMORY_INTENSITY}")
 fi
 
 if [[ -n "${POOL_RETRY_COUNT:-}" ]]; then
@@ -221,6 +312,18 @@ if [[ -n "${HYBRID_CPU_RESERVE_GPU_THRESHOLD:-}" ]]; then
   command+=(--hybrid-cpu-reserve-gpu-threshold "${HYBRID_CPU_RESERVE_GPU_THRESHOLD}")
 fi
 
+if [[ -n "${CPU_ONLY_RESERVE_SYSTEM_CORE:-}" ]]; then
+  if is_true "${CPU_ONLY_RESERVE_SYSTEM_CORE}"; then
+    command+=(--cpu-only-reserve-system-core)
+  else
+    command+=(--no-cpu-only-reserve-system-core)
+  fi
+fi
+
+if [[ -n "${CPU_ONLY_RESERVED_CORES:-}" ]]; then
+  command+=(--cpu-only-reserved-cores "${CPU_ONLY_RESERVED_CORES}")
+fi
+
 if [[ -n "${SHARE_QUEUE_CAPACITY:-}" ]]; then
   command+=(--share-queue-capacity "${SHARE_QUEUE_CAPACITY}")
 fi
@@ -239,6 +342,34 @@ fi
 
 if [[ -n "${RECENT_JOB_MAX_AGE_MS:-}" ]]; then
   command+=(--recent-job-max-age-ms "${RECENT_JOB_MAX_AGE_MS}")
+fi
+
+if [[ -n "${GPU_CPU_VERIFY:-}" ]]; then
+  command+=(--gpu-cpu-verify "${GPU_CPU_VERIFY}")
+fi
+
+if [[ -n "${GPU_OPENCL_MAD_ENABLE:-}" ]]; then
+  command+=(--gpu-opencl-mad-enable "${GPU_OPENCL_MAD_ENABLE}")
+fi
+
+if [[ -n "${GPU_OPENCL_NATIVE_MATH_ENABLE:-}" ]]; then
+  command+=(--gpu-opencl-native-math-enable "${GPU_OPENCL_NATIVE_MATH_ENABLE}")
+fi
+
+if [[ -n "${GPU_OPENCL_ACCURACY_BOOST:-}" ]]; then
+  command+=(--gpu-opencl-accuracy-boost "${GPU_OPENCL_ACCURACY_BOOST}")
+fi
+
+if [[ -n "${GPU_STRICT_JOB:-}" ]]; then
+  command+=(--gpu-strict-job "${GPU_STRICT_JOB}")
+fi
+
+if [[ -n "${GPU_RECENT_JOB_MAX_IDS:-}" ]]; then
+  command+=(--gpu-recent-job-max-ids "${GPU_RECENT_JOB_MAX_IDS}")
+fi
+
+if [[ -n "${GPU_RECENT_JOB_MAX_AGE_MS:-}" ]]; then
+  command+=(--gpu-recent-job-max-age-ms "${GPU_RECENT_JOB_MAX_AGE_MS}")
 fi
 
 if [[ -n "${TASK_DRAIN_TIMEOUT_MS:-}" ]]; then

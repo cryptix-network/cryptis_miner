@@ -59,7 +59,7 @@ kv_from_csv() {
 
 is_known_csv_key() {
   case "${1^^}" in
-    "POOL"|"TEMPLATE"|"PASS"|"PROTO"|"PROTO_FALLBACK"|"STRATUM_PROTOCOL_FALLBACK"|"TRANSPORT"|"ALGO"|"COIN"|"HASH"|"RANDOMX_HUGEPAGES"|"RANDOMX_MSR"|"CPU_COIN"|"CPU_HASH"|"GPU_COIN"|"GPU_HASH"|"CPU_POOL"|"CPU_FAILOVER_POOLS"|"CPU_PROTO"|"CPU_STRATUM_PROTOCOL"|"CPU_USER"|"CPU_PASSWORD"|"CPU_WALLET"|"GPU_POOL"|"GPU_FAILOVER_POOLS"|"GPU_PROTO"|"GPU_STRATUM_PROTOCOL"|"GPU_USER"|"GPU_PASSWORD"|"GPU_WALLET"|"WORKER"|"API_BIND"|"API_PORT"|"API_TOKEN"|"FRONTEND_BIND"|"FRONTEND_PORT"|"FRONTEND_DISABLED"|"FRONTEND_LOGS_DISABLED"|"FRONTEND_PASSWORD_ENABLED"|"FRONTEND_PASSWORD"|"FRONTEND_RATE_LIMIT_PER_MINUTE"|"BENCH_REPORT"|"BENCH_REPORT_INTERVAL_SEC"|"BENCH_REPORT_ID_FILE"|"BENCH_REPORT_API_KEY"|"BENCH_INSIGHTS"|"NO_CPU"|"NO_GPU"|"GPU_DEVICES"|"CUDA_DEVICES"|"OPENCL_DEVICES"|"GPU_BACKEND"|"INTENSITY"|"INTENSITY_MIN"|"INTENSITY_MAX"|"CPU_INTENSITY"|"GPU_INTENSITY"|"NO_CUDA"|"NO_OPENCL"|"DISABLE_GPU_AMD"|"DISABLE_GPU_NVIDIA"|"DISABLE_GPU_INTEL"|"RETRY_COUNT"|"RETRY_DELAY_MS"|"CONNECT_TIMEOUT_MS"|"TLS_TIMEOUT_MS"|"REQUEST_TIMEOUT_MS"|"JOB_CHANNEL_SIZE"|"JOB_RECV_TIMEOUT_MS"|"STATS_INTERVAL_MS"|"SHARE_QUEUE_CAPACITY"|"SHARE_SUBMIT_RATE"|"SHARE_SUBMIT_BURST"|"RECENT_JOB_MAX_IDS"|"RECENT_JOB_MAX_AGE_MS"|"GPU_STATUS_BOARD_INTERVAL_MS"|"HYBRID_CPU_RESERVE_MIN_CORES"|"HYBRID_CPU_RESERVE_MAX_CORES"|"HYBRID_CPU_RESERVE_GPU_THRESHOLD"|"TASK_DRAIN_TIMEOUT_MS"|"SHUTDOWN_POLL_MS"|"RECONNECT_MIN_DELAY_MS"|"RECONNECT_BACKOFF_MAX_POWER"|"WORKER_IDLE_SLEEP_MS"|"WORKER_RECV_TIMEOUT_MS"|"WORKER_MAX_SLICE_MS"|"WORKER_SLICE_CHECK_INTERVAL"|"WORKER_ACTIVE_POLL_INTERVAL"|"WORKER_STATS_FLUSH_THRESHOLD"|"WORKER_STATS_FLUSH_INTERVAL_MS"|"CPU_BATCH_BASE"|"CPU_BATCH_MIN"|"CPU_BATCH_MAX"|"CPU_BATCH_SIZE"|"GPU_BATCH_BASE"|"GPU_BATCH_MIN"|"GPU_BATCH_MAX"|"OPENCL_BATCH_SIZE"|"OPENCL_LOCAL_WORK_SIZE"|"AUTOLYKOS_BLOCK_SIZE"|"OPENCL_AUTOTUNE"|"CUDA_BATCH_SIZE"|"CUDA_BLOCK_SIZE"|"CUDA_AUTOTUNE"|"CPU_AUTOTUNE"|"CPU_AUTOTUNE_PROBE_MS"|"GPU_AUTOTUNE_ROUNDS"|"HIVE_STATS_PATH"|"HIVE_STATS_DISABLED"|"HIVE_PATH"|"HIVE_DISABLED")
+    "POOL"|"TEMPLATE"|"PASS"|"PROTO"|"PROTO_FALLBACK"|"STRATUM_PROTOCOL_FALLBACK"|"TRANSPORT"|"ALGO"|"COIN"|"HASH"|"RANDOMX_HUGEPAGES"|"RANDOMX_MSR"|"CPU_COIN"|"CPU_HASH"|"GPU_COIN"|"GPU_HASH"|"GPU_CORE_COIN"|"GPU_CORE_HASH"|"GPU_MEMORY_COIN"|"GPU_MEMORY_HASH"|"CPU_POOL"|"CPU_FAILOVER_POOLS"|"CPU_PROTO"|"CPU_STRATUM_PROTOCOL"|"CPU_USER"|"CPU_PASSWORD"|"CPU_WALLET"|"GPU_POOL"|"GPU_FAILOVER_POOLS"|"GPU_PROTO"|"GPU_STRATUM_PROTOCOL"|"GPU_USER"|"GPU_PASSWORD"|"GPU_WALLET"|"GPU_CORE_POOL"|"GPU_CORE_FAILOVER_POOLS"|"GPU_CORE_PROTO"|"GPU_CORE_STRATUM_PROTOCOL"|"GPU_CORE_USER"|"GPU_CORE_PASSWORD"|"GPU_CORE_WALLET"|"GPU_MEMORY_POOL"|"GPU_MEMORY_FAILOVER_POOLS"|"GPU_MEMORY_PROTO"|"GPU_MEMORY_STRATUM_PROTOCOL"|"GPU_MEMORY_USER"|"GPU_MEMORY_PASSWORD"|"GPU_MEMORY_WALLET"|"WORKER"|"API_BIND"|"API_PORT"|"API_TOKEN"|"FRONTEND_BIND"|"FRONTEND_PORT"|"FRONTEND_DISABLED"|"FRONTEND_LOGS_DISABLED"|"FRONTEND_PASSWORD_ENABLED"|"FRONTEND_PASSWORD"|"FRONTEND_RATE_LIMIT_PER_MINUTE"|"BENCH_REPORT"|"BENCH_REPORT_INTERVAL_SEC"|"BENCH_REPORT_ID_FILE"|"BENCH_REPORT_API_KEY"|"BENCH_INSIGHTS"|"NO_CPU"|"NO_GPU"|"GPU_DEVICES"|"CUDA_DEVICES"|"OPENCL_DEVICES"|"GPU_BACKEND"|"CUDA_EXPERIMENTAL"|"INTENSITY"|"INTENSITY_MIN"|"INTENSITY_MAX"|"CPU_INTENSITY"|"GPU_INTENSITY"|"GPU_CORE_INTENSITY"|"GPU_MEMORY_INTENSITY"|"NO_CUDA"|"NO_OPENCL"|"DISABLE_GPU_AMD"|"DISABLE_GPU_NVIDIA"|"DISABLE_GPU_INTEL"|"RETRY_COUNT"|"RETRY_DELAY_MS"|"CONNECT_TIMEOUT_MS"|"TLS_TIMEOUT_MS"|"REQUEST_TIMEOUT_MS"|"JOB_CHANNEL_SIZE"|"JOB_RECV_TIMEOUT_MS"|"STATS_INTERVAL_MS"|"SHARE_QUEUE_CAPACITY"|"SHARE_SUBMIT_RATE"|"SHARE_SUBMIT_BURST"|"RECENT_JOB_MAX_IDS"|"RECENT_JOB_MAX_AGE_MS"|"GPU_CPU_VERIFY"|"GPU_OPENCL_MAD_ENABLE"|"GPU_OPENCL_NATIVE_MATH_ENABLE"|"GPU_OPENCL_ACCURACY_BOOST"|"GPU_STRICT_JOB"|"GPU_RECENT_JOB_MAX_IDS"|"GPU_RECENT_JOB_MAX_AGE_MS"|"GPU_STATUS_BOARD_INTERVAL_MS"|"HYBRID_CPU_RESERVE_MIN_CORES"|"HYBRID_CPU_RESERVE_MAX_CORES"|"HYBRID_CPU_RESERVE_GPU_THRESHOLD"|"CPU_ONLY_RESERVE_SYSTEM_CORE"|"CPU_ONLY_RESERVED_CORES"|"TASK_DRAIN_TIMEOUT_MS"|"SHUTDOWN_POLL_MS"|"RECONNECT_MIN_DELAY_MS"|"RECONNECT_BACKOFF_MAX_POWER"|"WORKER_IDLE_SLEEP_MS"|"WORKER_RECV_TIMEOUT_MS"|"WORKER_MAX_SLICE_MS"|"WORKER_SLICE_CHECK_INTERVAL"|"WORKER_ACTIVE_POLL_INTERVAL"|"WORKER_STATS_FLUSH_THRESHOLD"|"WORKER_STATS_FLUSH_INTERVAL_MS"|"CPU_BATCH_BASE"|"CPU_BATCH_MIN"|"CPU_BATCH_MAX"|"CPU_BATCH_SIZE"|"GPU_BATCH_BASE"|"GPU_BATCH_MIN"|"GPU_BATCH_MAX"|"OPENCL_BATCH_SIZE"|"OPENCL_LOCAL_WORK_SIZE"|"AUTOLYKOS_BLOCK_SIZE"|"OPENCL_AUTOTUNE"|"CUDA_BATCH_SIZE"|"CUDA_BLOCK_SIZE"|"CUDA_AUTOTUNE"|"CPU_AUTOTUNE"|"CPU_AUTOTUNE_PROBE_MS"|"GPU_AUTOTUNE_ROUNDS"|"HIVE_STATS_PATH"|"HIVE_STATS_DISABLED"|"HIVE_PATH"|"HIVE_DISABLED")
       return 0
       ;;
     *)
@@ -85,6 +85,10 @@ cpu_coin_from_url="$(kv_from_csv "${safe_csv}" "CPU_COIN" || true)"
 cpu_hash_from_url="$(kv_from_csv "${safe_csv}" "CPU_HASH" || true)"
 gpu_coin_from_url="$(kv_from_csv "${safe_csv}" "GPU_COIN" || true)"
 gpu_hash_from_url="$(kv_from_csv "${safe_csv}" "GPU_HASH" || true)"
+gpu_core_coin_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_COIN" || true)"
+gpu_core_hash_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_HASH" || true)"
+gpu_memory_coin_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_COIN" || true)"
+gpu_memory_hash_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_HASH" || true)"
 cpu_pool_from_url="$(kv_from_csv "${safe_csv}" "CPU_POOL" || true)"
 cpu_failover_pools_from_url="$(kv_from_csv "${safe_csv}" "CPU_FAILOVER_POOLS" || true)"
 cpu_proto_from_url="$(kv_from_csv "${safe_csv}" "CPU_PROTO" || true)"
@@ -99,6 +103,20 @@ gpu_stratum_protocol_from_url="$(kv_from_csv "${safe_csv}" "GPU_STRATUM_PROTOCOL
 gpu_user_from_url="$(kv_from_csv "${safe_csv}" "GPU_USER" || true)"
 gpu_password_from_url="$(kv_from_csv "${safe_csv}" "GPU_PASSWORD" || true)"
 gpu_wallet_from_url="$(kv_from_csv "${safe_csv}" "GPU_WALLET" || true)"
+gpu_core_pool_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_POOL" || true)"
+gpu_core_failover_pools_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_FAILOVER_POOLS" || true)"
+gpu_core_proto_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_PROTO" || true)"
+gpu_core_stratum_protocol_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_STRATUM_PROTOCOL" || true)"
+gpu_core_user_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_USER" || true)"
+gpu_core_password_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_PASSWORD" || true)"
+gpu_core_wallet_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_WALLET" || true)"
+gpu_memory_pool_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_POOL" || true)"
+gpu_memory_failover_pools_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_FAILOVER_POOLS" || true)"
+gpu_memory_proto_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_PROTO" || true)"
+gpu_memory_stratum_protocol_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_STRATUM_PROTOCOL" || true)"
+gpu_memory_user_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_USER" || true)"
+gpu_memory_password_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_PASSWORD" || true)"
+gpu_memory_wallet_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_WALLET" || true)"
 worker_from_url="$(kv_from_csv "${safe_csv}" "WORKER" || true)"
 api_bind_from_url="$(kv_from_csv "${safe_csv}" "API_BIND" || true)"
 api_port_from_url="$(kv_from_csv "${safe_csv}" "API_PORT" || true)"
@@ -121,11 +139,14 @@ gpu_devices_from_url="$(kv_from_csv "${safe_csv}" "GPU_DEVICES" || true)"
 cuda_devices_from_url="$(kv_from_csv "${safe_csv}" "CUDA_DEVICES" || true)"
 opencl_devices_from_url="$(kv_from_csv "${safe_csv}" "OPENCL_DEVICES" || true)"
 gpu_backend_from_url="$(kv_from_csv "${safe_csv}" "GPU_BACKEND" || true)"
+cuda_experimental_from_url="$(kv_from_csv "${safe_csv}" "CUDA_EXPERIMENTAL" || true)"
 intensity_from_url="$(kv_from_csv "${safe_csv}" "INTENSITY" || true)"
 intensity_min_from_url="$(kv_from_csv "${safe_csv}" "INTENSITY_MIN" || true)"
 intensity_max_from_url="$(kv_from_csv "${safe_csv}" "INTENSITY_MAX" || true)"
 cpu_intensity_from_url="$(kv_from_csv "${safe_csv}" "CPU_INTENSITY" || true)"
 gpu_intensity_from_url="$(kv_from_csv "${safe_csv}" "GPU_INTENSITY" || true)"
+gpu_core_intensity_from_url="$(kv_from_csv "${safe_csv}" "GPU_CORE_INTENSITY" || true)"
+gpu_memory_intensity_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_INTENSITY" || true)"
 no_cuda_from_url="$(kv_from_csv "${safe_csv}" "NO_CUDA" || true)"
 no_opencl_from_url="$(kv_from_csv "${safe_csv}" "NO_OPENCL" || true)"
 disable_gpu_amd_from_url="$(kv_from_csv "${safe_csv}" "DISABLE_GPU_AMD" || true)"
@@ -144,10 +165,19 @@ share_submit_rate_from_url="$(kv_from_csv "${safe_csv}" "SHARE_SUBMIT_RATE" || t
 share_submit_burst_from_url="$(kv_from_csv "${safe_csv}" "SHARE_SUBMIT_BURST" || true)"
 recent_job_max_ids_from_url="$(kv_from_csv "${safe_csv}" "RECENT_JOB_MAX_IDS" || true)"
 recent_job_max_age_ms_from_url="$(kv_from_csv "${safe_csv}" "RECENT_JOB_MAX_AGE_MS" || true)"
+gpu_cpu_verify_from_url="$(kv_from_csv "${safe_csv}" "GPU_CPU_VERIFY" || true)"
+gpu_opencl_mad_enable_from_url="$(kv_from_csv "${safe_csv}" "GPU_OPENCL_MAD_ENABLE" || true)"
+gpu_opencl_native_math_enable_from_url="$(kv_from_csv "${safe_csv}" "GPU_OPENCL_NATIVE_MATH_ENABLE" || true)"
+gpu_opencl_accuracy_boost_from_url="$(kv_from_csv "${safe_csv}" "GPU_OPENCL_ACCURACY_BOOST" || true)"
+gpu_strict_job_from_url="$(kv_from_csv "${safe_csv}" "GPU_STRICT_JOB" || true)"
+gpu_recent_job_max_ids_from_url="$(kv_from_csv "${safe_csv}" "GPU_RECENT_JOB_MAX_IDS" || true)"
+gpu_recent_job_max_age_ms_from_url="$(kv_from_csv "${safe_csv}" "GPU_RECENT_JOB_MAX_AGE_MS" || true)"
 gpu_status_board_interval_ms_from_url="$(kv_from_csv "${safe_csv}" "GPU_STATUS_BOARD_INTERVAL_MS" || true)"
 hybrid_cpu_reserve_min_cores_from_url="$(kv_from_csv "${safe_csv}" "HYBRID_CPU_RESERVE_MIN_CORES" || true)"
 hybrid_cpu_reserve_max_cores_from_url="$(kv_from_csv "${safe_csv}" "HYBRID_CPU_RESERVE_MAX_CORES" || true)"
 hybrid_cpu_reserve_gpu_threshold_from_url="$(kv_from_csv "${safe_csv}" "HYBRID_CPU_RESERVE_GPU_THRESHOLD" || true)"
+cpu_only_reserve_system_core_from_url="$(kv_from_csv "${safe_csv}" "CPU_ONLY_RESERVE_SYSTEM_CORE" || true)"
+cpu_only_reserved_cores_from_url="$(kv_from_csv "${safe_csv}" "CPU_ONLY_RESERVED_CORES" || true)"
 task_drain_timeout_ms_from_url="$(kv_from_csv "${safe_csv}" "TASK_DRAIN_TIMEOUT_MS" || true)"
 shutdown_poll_ms_from_url="$(kv_from_csv "${safe_csv}" "SHUTDOWN_POLL_MS" || true)"
 reconnect_min_delay_ms_from_url="$(kv_from_csv "${safe_csv}" "RECONNECT_MIN_DELAY_MS" || true)"
@@ -218,6 +248,10 @@ cpu_coin="${CUSTOM_CPU_COIN:-${cpu_coin_from_url:-}}"
 cpu_hash="${CUSTOM_CPU_HASH:-${cpu_hash_from_url:-}}"
 gpu_coin="${CUSTOM_GPU_COIN:-${gpu_coin_from_url:-}}"
 gpu_hash="${CUSTOM_GPU_HASH:-${gpu_hash_from_url:-}}"
+gpu_core_coin="${CUSTOM_GPU_CORE_COIN:-${gpu_core_coin_from_url:-}}"
+gpu_core_hash="${CUSTOM_GPU_CORE_HASH:-${gpu_core_hash_from_url:-}}"
+gpu_memory_coin="${CUSTOM_GPU_MEMORY_COIN:-${gpu_memory_coin_from_url:-}}"
+gpu_memory_hash="${CUSTOM_GPU_MEMORY_HASH:-${gpu_memory_hash_from_url:-}}"
 cpu_pool="${CUSTOM_CPU_POOL:-${cpu_pool_from_url:-}}"
 cpu_failover_pools="${CUSTOM_CPU_FAILOVER_POOLS:-${cpu_failover_pools_from_url:-}}"
 cpu_stratum_protocol="${CUSTOM_CPU_STRATUM_PROTOCOL:-${cpu_stratum_protocol_from_url:-${cpu_proto_from_url:-}}}"
@@ -230,6 +264,18 @@ gpu_stratum_protocol="${CUSTOM_GPU_STRATUM_PROTOCOL:-${gpu_stratum_protocol_from
 gpu_user="${CUSTOM_GPU_USER:-${gpu_user_from_url:-}}"
 gpu_password="${CUSTOM_GPU_PASSWORD:-${gpu_password_from_url:-}}"
 gpu_wallet="${CUSTOM_GPU_WALLET:-${gpu_wallet_from_url:-}}"
+gpu_core_pool="${CUSTOM_GPU_CORE_POOL:-${gpu_core_pool_from_url:-}}"
+gpu_core_failover_pools="${CUSTOM_GPU_CORE_FAILOVER_POOLS:-${gpu_core_failover_pools_from_url:-}}"
+gpu_core_stratum_protocol="${CUSTOM_GPU_CORE_STRATUM_PROTOCOL:-${gpu_core_stratum_protocol_from_url:-${gpu_core_proto_from_url:-}}}"
+gpu_core_user="${CUSTOM_GPU_CORE_USER:-${gpu_core_user_from_url:-}}"
+gpu_core_password="${CUSTOM_GPU_CORE_PASSWORD:-${gpu_core_password_from_url:-}}"
+gpu_core_wallet="${CUSTOM_GPU_CORE_WALLET:-${gpu_core_wallet_from_url:-}}"
+gpu_memory_pool="${CUSTOM_GPU_MEMORY_POOL:-${gpu_memory_pool_from_url:-}}"
+gpu_memory_failover_pools="${CUSTOM_GPU_MEMORY_FAILOVER_POOLS:-${gpu_memory_failover_pools_from_url:-}}"
+gpu_memory_stratum_protocol="${CUSTOM_GPU_MEMORY_STRATUM_PROTOCOL:-${gpu_memory_stratum_protocol_from_url:-${gpu_memory_proto_from_url:-}}}"
+gpu_memory_user="${CUSTOM_GPU_MEMORY_USER:-${gpu_memory_user_from_url:-}}"
+gpu_memory_password="${CUSTOM_GPU_MEMORY_PASSWORD:-${gpu_memory_password_from_url:-}}"
+gpu_memory_wallet="${CUSTOM_GPU_MEMORY_WALLET:-${gpu_memory_wallet_from_url:-}}"
 extra_args="${CUSTOM_USER_CONFIG:-}"
 api_bind="${CUSTOM_API_BIND:-${api_bind_from_url:-127.0.0.1}}"
 api_port="${CUSTOM_API_PORT:-${api_port_from_url:-48673}}"
@@ -252,11 +298,14 @@ gpu_devices="${CUSTOM_GPU_DEVICES:-${gpu_devices_from_url:-}}"
 cuda_devices="${CUSTOM_CUDA_DEVICES:-${cuda_devices_from_url:-}}"
 opencl_devices="${CUSTOM_OPENCL_DEVICES:-${opencl_devices_from_url:-}}"
 gpu_backend="${CUSTOM_GPU_BACKEND:-${gpu_backend_from_url:-auto}}"
+cuda_experimental="${CUSTOM_CUDA_EXPERIMENTAL:-${cuda_experimental_from_url:-0}}"
 intensity="${CUSTOM_INTENSITY:-${intensity_from_url:-}}"
 intensity_min="${CUSTOM_INTENSITY_MIN:-${intensity_min_from_url:-}}"
 intensity_max="${CUSTOM_INTENSITY_MAX:-${intensity_max_from_url:-}}"
 cpu_intensity="${CUSTOM_CPU_INTENSITY:-${cpu_intensity_from_url:-}}"
 gpu_intensity="${CUSTOM_GPU_INTENSITY:-${gpu_intensity_from_url:-}}"
+gpu_core_intensity="${CUSTOM_GPU_CORE_INTENSITY:-${gpu_core_intensity_from_url:-}}"
+gpu_memory_intensity="${CUSTOM_GPU_MEMORY_INTENSITY:-${gpu_memory_intensity_from_url:-}}"
 no_cuda="${CUSTOM_NO_CUDA:-${no_cuda_from_url:-0}}"
 no_opencl="${CUSTOM_NO_OPENCL:-${no_opencl_from_url:-0}}"
 disable_gpu_amd="${CUSTOM_DISABLE_GPU_AMD:-${disable_gpu_amd_from_url:-0}}"
@@ -275,10 +324,19 @@ share_submit_rate="${CUSTOM_SHARE_SUBMIT_RATE:-${share_submit_rate_from_url:-}}"
 share_submit_burst="${CUSTOM_SHARE_SUBMIT_BURST:-${share_submit_burst_from_url:-}}"
 recent_job_max_ids="${CUSTOM_RECENT_JOB_MAX_IDS:-${recent_job_max_ids_from_url:-}}"
 recent_job_max_age_ms="${CUSTOM_RECENT_JOB_MAX_AGE_MS:-${recent_job_max_age_ms_from_url:-}}"
+gpu_cpu_verify="${CUSTOM_GPU_CPU_VERIFY:-${gpu_cpu_verify_from_url:-}}"
+gpu_opencl_mad_enable="${CUSTOM_GPU_OPENCL_MAD_ENABLE:-${gpu_opencl_mad_enable_from_url:-}}"
+gpu_opencl_native_math_enable="${CUSTOM_GPU_OPENCL_NATIVE_MATH_ENABLE:-${gpu_opencl_native_math_enable_from_url:-}}"
+gpu_opencl_accuracy_boost="${CUSTOM_GPU_OPENCL_ACCURACY_BOOST:-${gpu_opencl_accuracy_boost_from_url:-}}"
+gpu_strict_job="${CUSTOM_GPU_STRICT_JOB:-${gpu_strict_job_from_url:-}}"
+gpu_recent_job_max_ids="${CUSTOM_GPU_RECENT_JOB_MAX_IDS:-${gpu_recent_job_max_ids_from_url:-}}"
+gpu_recent_job_max_age_ms="${CUSTOM_GPU_RECENT_JOB_MAX_AGE_MS:-${gpu_recent_job_max_age_ms_from_url:-}}"
 gpu_status_board_interval_ms="${CUSTOM_GPU_STATUS_BOARD_INTERVAL_MS:-${gpu_status_board_interval_ms_from_url:-}}"
 hybrid_cpu_reserve_min_cores="${CUSTOM_HYBRID_CPU_RESERVE_MIN_CORES:-${hybrid_cpu_reserve_min_cores_from_url:-}}"
 hybrid_cpu_reserve_max_cores="${CUSTOM_HYBRID_CPU_RESERVE_MAX_CORES:-${hybrid_cpu_reserve_max_cores_from_url:-}}"
 hybrid_cpu_reserve_gpu_threshold="${CUSTOM_HYBRID_CPU_RESERVE_GPU_THRESHOLD:-${hybrid_cpu_reserve_gpu_threshold_from_url:-}}"
+cpu_only_reserve_system_core="${CUSTOM_CPU_ONLY_RESERVE_SYSTEM_CORE:-${cpu_only_reserve_system_core_from_url:-}}"
+cpu_only_reserved_cores="${CUSTOM_CPU_ONLY_RESERVED_CORES:-${cpu_only_reserved_cores_from_url:-}}"
 task_drain_timeout_ms="${CUSTOM_TASK_DRAIN_TIMEOUT_MS:-${task_drain_timeout_ms_from_url:-}}"
 shutdown_poll_ms="${CUSTOM_SHUTDOWN_POLL_MS:-${shutdown_poll_ms_from_url:-}}"
 reconnect_min_delay_ms="${CUSTOM_RECONNECT_MIN_DELAY_MS:-${reconnect_min_delay_ms_from_url:-}}"
@@ -314,10 +372,22 @@ normalize_lower() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
 }
 
+is_true() {
+  local value
+  value="$(normalize_lower "$(trim "${1:-}")")"
+  [[ "${value}" == "1" || "${value}" == "true" || "${value}" == "yes" || "${value}" == "on" ]]
+}
+
 canonical_coin() {
   case "$(normalize_lower "$(trim "$1")")" in
     "cryptix")
       printf 'cryptix'
+      ;;
+    "hoosat"|"htn")
+      printf 'hoosat'
+      ;;
+    "pepepow"|"pepe")
+      printf 'pepepow'
       ;;
     "monero"|"xmr")
       printf 'monero'
@@ -341,6 +411,9 @@ canonical_hash() {
   case "$(normalize_lower "$(trim "$1")")" in
     "ox8"|"cryptix-ox8"|"cryptixox8")
       printf 'ox8'
+      ;;
+    "hoohash"|"hoo-hash"|"hoosat"|"pepepow")
+      printf 'hoohash'
       ;;
     "randomx"|"random-x"|"rx"|"rx/0"|"rx-0")
       printf 'randomx'
@@ -389,6 +462,10 @@ if [[ -z "${coin}" || -z "${hash_name}" ]]; then
       coin="${coin:-cryptix}"
       hash_name="${hash_name:-ox8}"
       ;;
+    "hoohash"|"hoo-hash"|"hoosat"|"pepepow")
+      coin="${coin:-hoosat}"
+      hash_name="${hash_name:-hoohash}"
+      ;;
     "randomx"|"random-x"|"rx"|"rx/0"|"rx-0")
       coin="${coin:-monero}"
       hash_name="${hash_name:-randomx}"
@@ -398,18 +475,18 @@ if [[ -z "${coin}" || -z "${hash_name}" ]]; then
       hash_name="${hash_name:-autolykosv2}"
       ;;
     *)
-      echo "Unsupported ALGO '${algorithm}'. Use COIN/HASH with: cryptix+ox8, monero+randomx, zephyr+randomx, ergo+autolykosv2, unknown+ox8, unknown+randomx, unknown+autolykosv2." >&2
+      echo "Unsupported ALGO '${algorithm}'. Use COIN/HASH with: cryptix+ox8, hoosat+hoohash, pepepow+hoohash, monero+randomx, zephyr+randomx, ergo+autolykosv2, unknown+ox8, unknown+hoohash, unknown+randomx, unknown+autolykosv2." >&2
       exit 1
       ;;
   esac
 fi
 
 if ! coin="$(canonical_coin "${coin}")"; then
-  echo "Unsupported COIN '${coin}'. Supported: cryptix, monero, zephyr, ergo, unknown." >&2
+  echo "Unsupported COIN '${coin}'. Supported: cryptix, hoosat, pepepow, monero, zephyr, ergo, unknown." >&2
   exit 1
 fi
 if ! hash_name="$(canonical_hash "${hash_name}")"; then
-  echo "Unsupported HASH '${hash_name}'. Supported: ox8, randomx, autolykosv2." >&2
+  echo "Unsupported HASH '${hash_name}'. Supported: ox8, hoohash, randomx, autolykosv2." >&2
   exit 1
 fi
 
@@ -420,6 +497,13 @@ case "${coin}" in
       exit 1
     fi
     algorithm="cryptix-ox8"
+    ;;
+  "hoosat"|"pepepow")
+    if [[ "${hash_name}" != "hoohash" ]]; then
+      echo "Unsupported pair '${coin}+${hash_name}'. ${coin} supports only hoohash." >&2
+      exit 1
+    fi
+    algorithm="hoohash"
     ;;
   "monero"|"zephyr")
     if [[ "${hash_name}" != "randomx" ]]; then
@@ -438,6 +522,8 @@ case "${coin}" in
   "unknown")
     if [[ "${hash_name}" == "ox8" ]]; then
       algorithm="cryptix-ox8"
+    elif [[ "${hash_name}" == "hoohash" ]]; then
+      algorithm="hoohash"
     elif [[ "${hash_name}" == "randomx" ]]; then
       algorithm="randomx"
     else
@@ -462,9 +548,54 @@ if ! gpu_hash="$(normalize_optional_hash "${gpu_hash}")"; then
   echo "Unsupported GPU_HASH '${gpu_hash}'." >&2
   exit 1
 fi
+if ! gpu_core_coin="$(normalize_optional_coin "${gpu_core_coin}")"; then
+  echo "Unsupported GPU_CORE_COIN '${gpu_core_coin}'." >&2
+  exit 1
+fi
+if ! gpu_core_hash="$(normalize_optional_hash "${gpu_core_hash}")"; then
+  echo "Unsupported GPU_CORE_HASH '${gpu_core_hash}'." >&2
+  exit 1
+fi
+if ! gpu_memory_coin="$(normalize_optional_coin "${gpu_memory_coin}")"; then
+  echo "Unsupported GPU_MEMORY_COIN '${gpu_memory_coin}'." >&2
+  exit 1
+fi
+if ! gpu_memory_hash="$(normalize_optional_hash "${gpu_memory_hash}")"; then
+  echo "Unsupported GPU_MEMORY_HASH '${gpu_memory_hash}'." >&2
+  exit 1
+fi
+if [[ "${gpu_hash}" == "randomx" ]]; then
+  echo "Unsupported GPU_HASH 'randomx'. Use randomx on CPU and set GPU_HASH to ox8, hoohash, or autolykosv2." >&2
+  exit 1
+fi
+if [[ "${gpu_core_hash}" == "randomx" ]]; then
+  echo "Unsupported GPU_CORE_HASH 'randomx'. Use randomx on CPU and set GPU_CORE_HASH to ox8, hoohash, or autolykosv2." >&2
+  exit 1
+fi
+if [[ "${gpu_memory_hash}" == "randomx" ]]; then
+  echo "Unsupported GPU_MEMORY_HASH 'randomx'. Use randomx on CPU and set GPU_MEMORY_HASH to ox8, hoohash, or autolykosv2." >&2
+  exit 1
+fi
+if [[ -n "${gpu_memory_hash}" ]]; then
+  effective_gpu_core_hash="${gpu_core_hash:-${gpu_hash:-${hash_name}}}"
+  if [[ "${gpu_memory_hash}" != "autolykosv2" || ( "${effective_gpu_core_hash}" != "ox8" && "${effective_gpu_core_hash}" != "hoohash" ) ]]; then
+    echo "Unsupported dual/triple lane hash pair: supported pairs are gpu-core='ox8'+gpu-memory='autolykosv2' and gpu-core='hoohash'+gpu-memory='autolykosv2'." >&2
+    exit 1
+  fi
+  if [[ "${effective_gpu_core_hash}" == "hoohash" ]] && is_true "${no_opencl}"; then
+    echo "Unsupported dual/triple lane hash pair gpu-core='hoohash'+gpu-memory='autolykosv2': this pair is currently OpenCL-only, but NO_OPENCL=1 is set." >&2
+    exit 1
+  fi
+fi
+if is_true "${no_cpu}" && [[ -z "${gpu_hash}" ]] && [[ "${hash_name}" == "randomx" ]]; then
+  echo "Invalid mode: NO_CPU=1 with HASH=randomx requires GPU_HASH=ox8|hoohash|autolykosv2 (or disable NO_CPU)." >&2
+  exit 1
+fi
 
 cpu_failover_pools="$(normalize_pool_list "${cpu_failover_pools}")"
 gpu_failover_pools="$(normalize_pool_list "${gpu_failover_pools}")"
+gpu_core_failover_pools="$(normalize_pool_list "${gpu_core_failover_pools}")"
+gpu_memory_failover_pools="$(normalize_pool_list "${gpu_memory_failover_pools}")"
 
 mkdir -p "$(dirname "${CUSTOM_CONFIG_FILENAME}")"
 
@@ -482,6 +613,10 @@ mkdir -p "$(dirname "${CUSTOM_CONFIG_FILENAME}")"
   printf 'CPU_HASH=%q\n' "${cpu_hash}"
   printf 'GPU_COIN=%q\n' "${gpu_coin}"
   printf 'GPU_HASH=%q\n' "${gpu_hash}"
+  printf 'GPU_CORE_COIN=%q\n' "${gpu_core_coin}"
+  printf 'GPU_CORE_HASH=%q\n' "${gpu_core_hash}"
+  printf 'GPU_MEMORY_COIN=%q\n' "${gpu_memory_coin}"
+  printf 'GPU_MEMORY_HASH=%q\n' "${gpu_memory_hash}"
   printf 'CPU_POOL=%q\n' "${cpu_pool}"
   printf 'CPU_FAILOVER_POOLS=%q\n' "${cpu_failover_pools}"
   printf 'CPU_STRATUM_PROTOCOL=%q\n' "${cpu_stratum_protocol}"
@@ -494,6 +629,18 @@ mkdir -p "$(dirname "${CUSTOM_CONFIG_FILENAME}")"
   printf 'GPU_USER=%q\n' "${gpu_user}"
   printf 'GPU_PASSWORD=%q\n' "${gpu_password}"
   printf 'GPU_WALLET=%q\n' "${gpu_wallet}"
+  printf 'GPU_CORE_POOL=%q\n' "${gpu_core_pool}"
+  printf 'GPU_CORE_FAILOVER_POOLS=%q\n' "${gpu_core_failover_pools}"
+  printf 'GPU_CORE_STRATUM_PROTOCOL=%q\n' "${gpu_core_stratum_protocol}"
+  printf 'GPU_CORE_USER=%q\n' "${gpu_core_user}"
+  printf 'GPU_CORE_PASSWORD=%q\n' "${gpu_core_password}"
+  printf 'GPU_CORE_WALLET=%q\n' "${gpu_core_wallet}"
+  printf 'GPU_MEMORY_POOL=%q\n' "${gpu_memory_pool}"
+  printf 'GPU_MEMORY_FAILOVER_POOLS=%q\n' "${gpu_memory_failover_pools}"
+  printf 'GPU_MEMORY_STRATUM_PROTOCOL=%q\n' "${gpu_memory_stratum_protocol}"
+  printf 'GPU_MEMORY_USER=%q\n' "${gpu_memory_user}"
+  printf 'GPU_MEMORY_PASSWORD=%q\n' "${gpu_memory_password}"
+  printf 'GPU_MEMORY_WALLET=%q\n' "${gpu_memory_wallet}"
   printf 'STRATUM_PROTOCOL=%q\n' "${stratum_protocol}"
   printf 'STRATUM_PROTOCOL_FALLBACK=%q\n' "${stratum_protocol_fallback}"
   printf 'STRATUM_TRANSPORT=%q\n' "${stratum_transport}"
@@ -519,11 +666,14 @@ mkdir -p "$(dirname "${CUSTOM_CONFIG_FILENAME}")"
   printf 'CUDA_DEVICES=%q\n' "${cuda_devices}"
   printf 'OPENCL_DEVICES=%q\n' "${opencl_devices}"
   printf 'GPU_BACKEND=%q\n' "${gpu_backend}"
+  printf 'CUDA_EXPERIMENTAL=%q\n' "${cuda_experimental}"
   printf 'INTENSITY=%q\n' "${intensity}"
   printf 'INTENSITY_MIN=%q\n' "${intensity_min}"
   printf 'INTENSITY_MAX=%q\n' "${intensity_max}"
   printf 'CPU_INTENSITY=%q\n' "${cpu_intensity}"
   printf 'GPU_INTENSITY=%q\n' "${gpu_intensity}"
+  printf 'GPU_CORE_INTENSITY=%q\n' "${gpu_core_intensity}"
+  printf 'GPU_MEMORY_INTENSITY=%q\n' "${gpu_memory_intensity}"
   printf 'NO_CUDA=%q\n' "${no_cuda}"
   printf 'NO_OPENCL=%q\n' "${no_opencl}"
   printf 'DISABLE_GPU_AMD=%q\n' "${disable_gpu_amd}"
@@ -542,10 +692,19 @@ mkdir -p "$(dirname "${CUSTOM_CONFIG_FILENAME}")"
   printf 'SHARE_SUBMIT_BURST=%q\n' "${share_submit_burst}"
   printf 'RECENT_JOB_MAX_IDS=%q\n' "${recent_job_max_ids}"
   printf 'RECENT_JOB_MAX_AGE_MS=%q\n' "${recent_job_max_age_ms}"
+  printf 'GPU_CPU_VERIFY=%q\n' "${gpu_cpu_verify}"
+  printf 'GPU_OPENCL_MAD_ENABLE=%q\n' "${gpu_opencl_mad_enable}"
+  printf 'GPU_OPENCL_NATIVE_MATH_ENABLE=%q\n' "${gpu_opencl_native_math_enable}"
+  printf 'GPU_OPENCL_ACCURACY_BOOST=%q\n' "${gpu_opencl_accuracy_boost}"
+  printf 'GPU_STRICT_JOB=%q\n' "${gpu_strict_job}"
+  printf 'GPU_RECENT_JOB_MAX_IDS=%q\n' "${gpu_recent_job_max_ids}"
+  printf 'GPU_RECENT_JOB_MAX_AGE_MS=%q\n' "${gpu_recent_job_max_age_ms}"
   printf 'GPU_STATUS_BOARD_INTERVAL_MS=%q\n' "${gpu_status_board_interval_ms}"
   printf 'HYBRID_CPU_RESERVE_MIN_CORES=%q\n' "${hybrid_cpu_reserve_min_cores}"
   printf 'HYBRID_CPU_RESERVE_MAX_CORES=%q\n' "${hybrid_cpu_reserve_max_cores}"
   printf 'HYBRID_CPU_RESERVE_GPU_THRESHOLD=%q\n' "${hybrid_cpu_reserve_gpu_threshold}"
+  printf 'CPU_ONLY_RESERVE_SYSTEM_CORE=%q\n' "${cpu_only_reserve_system_core}"
+  printf 'CPU_ONLY_RESERVED_CORES=%q\n' "${cpu_only_reserved_cores}"
   printf 'TASK_DRAIN_TIMEOUT_MS=%q\n' "${task_drain_timeout_ms}"
   printf 'SHUTDOWN_POLL_MS=%q\n' "${shutdown_poll_ms}"
   printf 'RECONNECT_MIN_DELAY_MS=%q\n' "${reconnect_min_delay_ms}"
