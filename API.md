@@ -25,6 +25,9 @@ Configured in `[api]` (`configs/default.toml`):
 - `allowed_ips` (optional IP allowlist)
 - `rate_limit_per_minute` (optional per-IP limit)
 
+CLI override:
+- `--api-token <TOKEN>` (equivalent to setting `api.auth_token`)
+
 Behavior:
 - Missing/invalid token: `401 Unauthorized`
 - IP not allowed: `403 Forbidden`

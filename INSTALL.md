@@ -123,16 +123,28 @@ Use a Custom miner entry and pass config in `CUSTOM_URL` style. Example:
 POOL:stratum+tcp://POOL:PORT,TEMPLATE:YOUR_WALLET.rig01,PASS:x,COIN:cryptix,HASH:ox8,GPU_BACKEND:opencl,NO_CPU:1
 ```
 
-RandomX CPU-only example:
+RandomX example:
 
 ```text
 POOL:stratum+tcp://RANDOMX_POOL:PORT,TEMPLATE:YOUR_MONERO_WALLET.rig01,PASS:x,COIN:monero,HASH:randomx,NO_GPU:1
+```
+
+Autolykos v2 CPU-only example:
+
+```text
+POOL:stratum+tcp://ERGO_POOL:PORT,TEMPLATE:YOUR_ERGO_WALLET.rig01,PASS:x,COIN:ergo,HASH:autolykosv2,NO_GPU:1
 ```
 
 Hybrid mixed-target example (CPU RandomX + GPU ox8 with separate pools):
 
 ```text
 POOL:stratum+tcp://RANDOMX_POOL:PORT,TEMPLATE:CPU_WALLET.rig01,PASS:x,COIN:monero,HASH:randomx,GPU_COIN:unknown,GPU_HASH:ox8,CPU_POOL:stratum+tcp://RANDOMX_POOL:PORT,GPU_POOL:stratum+tcp://OX8_POOL:PORT,GPU_WALLET:GPU_WALLET
+```
+
+HooHash GPU example (safe defaults, OpenCL):
+
+```text
+POOL:stratum+tcp://HOOHASH_POOL:PORT,TEMPLATE:YOUR_WALLET.rig01,PASS:x,COIN:hoosat,HASH:hoohash,GPU_BACKEND:opencl,NO_CPU:1,GPU_CPU_VERIFY:hoohash=on,GPU_OPENCL_NATIVE_MATH_ENABLE:hoohash=off,GPU_OPENCL_ACCURACY_BOOST:hoohash=off
 ```
 
 HiveOS mode flags:
@@ -149,26 +161,38 @@ Useful keys:
 - `NO_CPU`, `NO_GPU`
 - `GPU_BACKEND` (`opencl` recommended for current build)
 - `GPU_DEVICES` (for example `0,1`)
+- `GPU_CPU_VERIFY` (for example `hoohash=on`)
+- `GPU_OPENCL_MAD_ENABLE` (for example `hoohash=off`)
+- `GPU_OPENCL_NATIVE_MATH_ENABLE` (for example `hoohash=off`)
+- `GPU_OPENCL_ACCURACY_BOOST` (for example `hoohash=on`; hoohash-only and requires `GPU_CPU_VERIFY` for hoohash)
+- `GPU_STRICT_JOB`, `GPU_RECENT_JOB_MAX_IDS`, `GPU_RECENT_JOB_MAX_AGE_MS`
 - `HYBRID_CPU_RESERVE_MIN_CORES` (reserved CPU cores for hybrid when GPU count is small)
 - `HYBRID_CPU_RESERVE_MAX_CORES` (reserved CPU cores for hybrid when GPU count is large)
 - `HYBRID_CPU_RESERVE_GPU_THRESHOLD` (GPU-count switch threshold for min/max reserve)
+- `CPU_ONLY_RESERVE_SYSTEM_CORE` (`1/0` toggle for CPU-only system-core reservation)
+- `CPU_ONLY_RESERVED_CORES` (reserved CPU cores in CPU-only mode, default `1`)
 - `FRONTEND_LOGS_DISABLED` (`1` disables frontend log pane, default `0`)
 - `AUTOLYKOS_BLOCK_SIZE` (Autolykos-only GPU block size; `>=64`, divisible by `8`)
 
 Supported coin/hash pairs in HiveOS wrapper:
 - `cryptix + ox8`
+- `hoosat + hoohash`
+- `pepepow + hoohash`
 - `monero + randomx`
 - `zephyr + randomx`
+- `ergo + autolykosv2`
 - `unknown + ox8`
+- `unknown + hoohash`
 - `unknown + randomx`
+- `unknown + autolykosv2`
 
 ## Quick start arguments (most important)
 
 - `--pool` pool URL
 - `--wallet` wallet address
 - `--worker` worker name
-- `--coin` one of `cryptix`, `monero`, `zephyr`, `unknown`
-- `--hash` one of `ox8`, `randomx`
+- `--coin` one of `cryptix`, `hoosat`, `pepepow`, `monero`, `zephyr`, `ergo`, `unknown`
+- `--hash` one of `ox8`, `hoohash`, `randomx`, `autolykosv2`
 - `--cpu-coin`, `--cpu-hash`, `--gpu-coin`, `--gpu-hash`
 - `--cpu-pool`, `--cpu-failover-pools`, `--gpu-pool`, `--gpu-failover-pools`
 - `--threads` CPU threads
@@ -176,6 +200,9 @@ Supported coin/hash pairs in HiveOS wrapper:
 - `--no-gpu` CPU-only
 - `--gpu-devices` select GPU indexes (example `0,1`)
 - `--gpu-backend opencl` force OpenCL backend
+- `--gpu-cpu-verify hoohash=on`
+- `--gpu-opencl-native-math-enable hoohash=off`
+- `--gpu-opencl-accuracy-boost hoohash=off`
 - `--cuda --cuda-experimental` enable experimental CUDA test path (not performance-optimized yet)
 
 Examples:
@@ -192,6 +219,9 @@ Examples:
 
 # CPU RandomX
 ./cryptis-miner mine --coin monero --hash randomx --pool stratum+tcp://RANDOMX_POOL:PORT --wallet YOUR_MONERO_WALLET --worker rig01 --no-gpu
+
+# CPU Autolykos v2 (reference verifier path)
+./cryptis-miner mine --coin ergo --hash autolykosv2 --pool stratum+tcp://ERGO_POOL:PORT --wallet YOUR_ERGO_WALLET --worker rig01 --no-gpu
 
 # Hybrid mixed target (CPU RandomX + GPU ox8)
 ./cryptis-miner mine --coin monero --hash randomx --pool stratum+tcp://RANDOMX_POOL:PORT --wallet CPU_WALLET --worker rig01 --cpu-pool stratum+tcp://RANDOMX_POOL:PORT --gpu-pool stratum+tcp://OX8_POOL:PORT --gpu-wallet GPU_WALLET --gpu-coin unknown --gpu-hash ox8

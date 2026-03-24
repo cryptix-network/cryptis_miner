@@ -1,28 +1,51 @@
 # Cryptis Miner
 
-Cryptis Miner is a performance-oriented miner designed for real multi-device rigs. It focuses on maximum compatibility across different hardware and platforms, combined with automatic performance optimization.
+Cryptis Miner is a performance-oriented miner designed for real multi-device rigs.  
+It focuses on broad hardware compatibility, stable operation, and practical tuning for production mining setups.
 
-Website:
-https://cryptis-miner.cryptix-network.org/
+- Website: https://cryptis-miner.cryptix-network.org/
+- Public Benchmarks: https://cryptis-miner.cryptix-network.org/bench
+- Benchmark API: https://cryptis-miner.cryptix-network.org/api/v1/overview
 
-Public Benchmarks:
-https://cryptis-miner.cryptix-network.org/bench
+## Documentation Guide
 
-Benchmark API:
-https://cryptis-miner.cryptix-network.org/api/v1/overview
+- Installation/platform setup: [INSTALL.md](INSTALL.md)
+- Batch starter scripts (Windows): [batch/README.md](batch/README.md)
+- API reference: [API.md](API.md)
+- Stratum details: [STRATUM_PROTOCOL_INFO.md](STRATUM_PROTOCOL_INFO.md)
+- Known issues: [BUGS.md](BUGS.md)
+
+## Table of Contents
+
+- [Currently Supported Targets](#currently-supported-targets)
+- [What It Supports](#what-it-supports)
+- [Supported Platforms](#supported-platforms)
+- [Browser Dashboard](#browser-dashboard)
+- [Quick Start](#quick-start)
+- [Start Examples (Modes + Hash Targets)](#start-examples-modes--hash-targets)
+- [Runtime Notes](#runtime-notes)
+- [Frontend Runtime Notes](#frontend-runtime-notes)
+- [CLI Reference (All Startup Arguments)](#cli-reference-all-startup-arguments)
+- [API Endpoints](#api-endpoints)
+- [Config File](#config-file)
+- [Support](#support)
 
 ## Currently Supported Targets
 
 - `cryptix + ox8` (CPU/GPU)
-- `monero + randomx` (CPU)
-- `zephyr + randomx` (CPU)
-- `ergo + autolykosv2` (GPU)
+- `hoosat + hoohash` (CPU/GPU)
+- `pepepow + hoohash` (CPU/GPU)
+- `monero + randomx` (CPU-only)
+- `zephyr + randomx` (CPU-only)
+- `ergo + autolykosv2` (CPU/GPU)
 - `unknown + ox8` (CPU/GPU)
-- `unknown + randomx` (CPU)
-- `unknown + autolykosv2` (GPU)
+- `unknown + hoohash` (CPU/GPU)
+- `unknown + randomx` (CPU-only)
+- `unknown + autolykosv2` (CPU/GPU)
 
 GPU runtime supports:
 - `ox8`
+- `hoohash`
 - `autolykosv2`
 
 ## What It Supports
@@ -30,6 +53,8 @@ GPU runtime supports:
 - CPU-only mining
 - GPU-only mining
 - CPU + GPU hybrid mining
+- Dual GPU lane mining on the same GPU set (core lane + memory lane)
+- Triple mining (CPU + GPU core lane + GPU memory lane)
 - Hybrid target overrides (`cpu-coin/cpu-hash` and `gpu-coin/gpu-hash`)
 - Multi-CPU support
 - Multi-GPU support
@@ -51,8 +76,9 @@ Architectures:
 
 `macOS / Apple` is not supported in official releases.
 
-## Browser Dashboard: 
-Open the URL: http://127.0.0.1:8943/ in your browser to access the dashboard.
+## Browser Dashboard
+
+Open `http://127.0.0.1:8943/` in your browser to access the embedded dashboard.
 
 ## Quick Start
 
@@ -102,9 +128,14 @@ CPU-only:
 ```bash
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8 --no-gpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash ox8 --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin hoosat --hash hoohash --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin pepepow --hash hoohash --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash hoohash --no-gpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin monero --hash randomx --no-gpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin zephyr --hash randomx --no-gpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash randomx --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin ergo --hash autolykosv2 --no-gpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash autolykosv2 --no-gpu
 ```
 
 GPU-only:
@@ -112,6 +143,9 @@ GPU-only:
 ```bash
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8 --no-cpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash ox8 --no-cpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin hoosat --hash hoohash --no-cpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin pepepow --hash hoohash --no-cpu
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash hoohash --no-cpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin ergo --hash autolykosv2 --no-cpu
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash autolykosv2 --no-cpu
 ```
@@ -121,17 +155,32 @@ CPU+GPU hybrid:
 ```bash
 cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8
 cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin monero --hash randomx --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-pool <GPU_POOL_URL> --gpu-wallet <GPU_WALLET> --gpu-password x --gpu-coin unknown --gpu-hash ox8
-cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin monero --hash randomx --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-pool <GPU_POOL_URL> --gpu-wallet <GPU_WALLET> --gpu-password x --gpu-coin ergo --gpu-hash autolykosv2
+cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin cryptix --hash ox8 --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-pool <GPU_POOL_URL> --gpu-wallet <GPU_WALLET> --gpu-password x --gpu-coin ergo --gpu-hash autolykosv2
+cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin hoosat --hash hoohash --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-pool <GPU_POOL_URL> --gpu-wallet <GPU_WALLET> --gpu-password x --gpu-coin unknown --gpu-hash ox8
+cryptis-miner.exe --pool <POOL_URL> --wallet <WALLET> --worker <WORKER> --password x --coin unknown --hash hoohash --gpu-coin unknown --gpu-hash hoohash
+```
+
+Dual GPU lanes (same GPUs, OpenCL): core + memory
+
+```bash
+cryptis-miner.exe --pool <GPU_CORE_POOL_URL> --wallet <GPU_CORE_WALLET> --worker <WORKER> --password x --coin unknown --hash ox8 --no-cpu --gpu-backend opencl --gpu-core-coin unknown --gpu-core-hash ox8 --gpu-memory-coin unknown --gpu-memory-hash autolykosv2 --gpu-core-pool <GPU_CORE_POOL_URL> --gpu-core-wallet <GPU_CORE_WALLET> --gpu-core-password x --gpu-memory-pool <GPU_MEMORY_POOL_URL> --gpu-memory-wallet <GPU_MEMORY_WALLET> --gpu-memory-password x --gpu-core-intensity 0.55 --gpu-memory-intensity 0.45
+cryptis-miner.exe --pool <GPU_CORE_POOL_URL> --wallet <GPU_CORE_WALLET> --worker <WORKER> --password x --coin unknown --hash hoohash --no-cpu --gpu-backend opencl --gpu-core-coin unknown --gpu-core-hash hoohash --gpu-memory-coin unknown --gpu-memory-hash autolykosv2 --gpu-core-pool <GPU_CORE_POOL_URL> --gpu-core-wallet <GPU_CORE_WALLET> --gpu-core-password x --gpu-memory-pool <GPU_MEMORY_POOL_URL> --gpu-memory-wallet <GPU_MEMORY_WALLET> --gpu-memory-password x --gpu-core-intensity 0.55 --gpu-memory-intensity 0.45
+```
+
+Triple mode (CPU + GPU core + GPU memory):
+
+```bash
+cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin monero --hash randomx --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-backend opencl --gpu-core-coin unknown --gpu-core-hash ox8 --gpu-memory-coin unknown --gpu-memory-hash autolykosv2 --gpu-core-pool <GPU_CORE_POOL_URL> --gpu-core-wallet <GPU_CORE_WALLET> --gpu-core-password x --gpu-memory-pool <GPU_MEMORY_POOL_URL> --gpu-memory-wallet <GPU_MEMORY_WALLET> --gpu-memory-password x --gpu-core-intensity 0.55 --gpu-memory-intensity 0.45
+cryptis-miner.exe --pool <CPU_POOL_URL> --wallet <CPU_WALLET> --worker <WORKER> --password x --coin monero --hash randomx --cpu-pool <CPU_POOL_URL> --cpu-wallet <CPU_WALLET> --gpu-backend opencl --gpu-core-coin unknown --gpu-core-hash hoohash --gpu-memory-coin unknown --gpu-memory-hash autolykosv2 --gpu-core-pool <GPU_CORE_POOL_URL> --gpu-core-wallet <GPU_CORE_WALLET> --gpu-core-password x --gpu-memory-pool <GPU_MEMORY_POOL_URL> --gpu-memory-wallet <GPU_MEMORY_WALLET> --gpu-memory-password x --gpu-core-intensity 0.55 --gpu-memory-intensity 0.45
 ```
 
 Windows starter scripts are in `batch/`:
 
-- `batch/developer-start.bat` (advanced template with tuning switches)
-- `batch/start-cpu-*.bat` (5 CPU target presets)
-- `batch/start-gpu-*.bat` (4 GPU target presets)
-- `batch/start-hybrid-*.bat` (20 CPUxGPU hybrid combinations)
 - GPU script examples:
   - `batch/start-gpu-cryptix-ox8.bat`
+  - `batch/start-gpu-hoosat-hoohash.bat`
+  - `batch/start-gpu-pepepow-hoohash.bat`
+  - `batch/start-gpu-unknown-hoohash.bat`
   - `batch/start-gpu-ergo-autolykosv2.bat`
   - `batch/start-gpu-unknown-autolykosv2.bat`
   - `batch/start-gpu-unknown-ox8.bat`
@@ -140,16 +189,28 @@ Hybrid naming format:
 
 - `start-hybrid-<cpu-coin>-<cpu-hash>__<gpu-coin>-<gpu-hash>.bat`
 
+Dual naming format:
+
+- `start-dual-<gpu-core-coin>-<gpu-core-hash>__<gpu-memory-coin>-<gpu-memory-hash>.bat`
+
+Triple naming format:
+
+- `start-triple-<cpu-coin>-<cpu-hash>__<gpu-core-coin>-<gpu-core-hash>__<gpu-memory-coin>-<gpu-memory-hash>.bat`
+
 Examples:
 
-- `start-hybrid-monero-randomx__ergo-autolykosv2.bat`
-- `start-hybrid-unknown-randomx__unknown-autolykosv2.bat`
+- `start-hybrid-cryptix-ox8__ergo-autolykosv2.bat`
+- `start-hybrid-monero-randomx__unknown-ox8.bat`
+- `start-hybrid-hoosat-hoohash__hoosat-hoohash.bat`
+- `start-hybrid-unknown-hoohash__unknown-hoohash.bat`
 - `start-hybrid-cryptix-ox8__unknown-ox8.bat`
+- `start-dual-unknown-ox8__unknown-autolykosv2.bat`
+- `start-triple-monero-randomx__unknown-ox8__unknown-autolykosv2.bat`
 
 Hybrid script note:
 
 - Same-target hybrid (`ox8+ox8`) can use one pool setup.
-- Mixed-target hybrid (for example `randomx + ox8` or `randomx + autolykosv2`) requires separate endpoint sets for CPU and GPU, including failovers.
+- Mixed-target hybrid (for example `CPU randomx + GPU ox8` or `CPU ox8 + GPU autolykosv2`) requires separate endpoint sets for CPU and GPU, including failovers.
 - Use `--cpu-pool`/`--gpu-pool` and optional `--cpu-failover-pools`/`--gpu-failover-pools`.
 
 ## Runtime Notes
@@ -167,25 +228,61 @@ Hybrid script note:
 - Default CUDA experimental state is controlled by `CUDA_HASHING_EXPERIMENTAL_ENABLED` in `src/mining/gpu/cuda.rs`; `--cuda-experimental` overrides it at runtime.
 - Mixed rigs can run OpenCL + CUDA together when `cuda_devices` and `opencl_devices` are set to disjoint GPU id lists.
 - In hybrid mode with different targets, overlapping CPU/GPU pool endpoint sets are rejected at startup (must be separated by target).
+- Dual/triple lane mode is available via `--gpu-core-*` + `--gpu-memory-*` and currently runs in OpenCL lane mode (both lanes are forced to OpenCL in this release).
+- Current dual/triple hash pairs for production are `gpu-core=ox8` + `gpu-memory=autolykosv2` and `gpu-core=hoohash` + `gpu-memory=autolykosv2` (the `hoohash` pair is OpenCL-only in this release; other pairs keep GPU core active and disable memory lane).
+- GPU launch autotune is globally serialized across lanes/process workers in one miner instance, so dual/triple startup tuning runs one-at-a-time instead of competing on the same GPUs.
+- In dual/triple mode with different targets, overlapping pool endpoint sets across active lanes are rejected at startup (CPU, GPU core, GPU memory).
 - Hybrid CPU core reservation is configurable in `[mining.runtime]`:
   - `hybrid_cpu_reserve_min_cores`
   - `hybrid_cpu_reserve_max_cores`
   - `hybrid_cpu_reserve_gpu_threshold`
+- CPU-only system-core reservation is configurable in `[mining.runtime]`:
+  - `cpu_only_reserve_system_core` (default: `true`)
+  - `cpu_only_reserved_cores` (default: `1`)
+- Pool reconnect budgets:
+  - `pool.retry_count` (default: `50`)
+  - `pool.failover_retry_count` (default: `0` = unlimited)
+- Per-hash GPU share policy is configurable in `[mining.runtime.gpu_hash_policies.<hash>]`:
+  - `cpu_verify`
+  - `opencl_mad_enable`
+  - `opencl_native_math_enable` (experimental)
+  - `opencl_fp_contract_disable` (hoohash-only)
+  - `opencl_accuracy_boost` (experimental, hoohash-only, requires `cpu_verify=true`)
+  - `cuda_strict_math_enable` (hoohash-only)
+  - `strict_kernel_verify` (hoohash-only)
+  - `strict_job`
+  - `recent_job_max_ids`
+  - `recent_job_max_age_ms`
+  - Default policy:
+    - `ox8`: `cpu_verify=false`, `strict_job=false`, window `64 / 8000ms`
+    - `hoohash`: `cpu_verify=true`, `opencl_fp_contract_disable=true`, `cuda_strict_math_enable=true`, `strict_kernel_verify=false`, `strict_job=false`, window `640 / 1000ms`
+    - `autolykosv2`: `cpu_verify=false`, `strict_job=true`
+- HooHash OpenCL tuning:
+  - `opencl_native_math_enable=false` by default; can increase speed but may reduce CPU-verified share accuracy.
+  - `opencl_fp_contract_disable=true` by default; reduces FMA/contraction variance between OpenCL compilers.
+  - `opencl_accuracy_boost=false` by default; can improve accepted-share quality near precision boundaries at the cost of extra CPU verify work.
+- HooHash CUDA tuning:
+  - `cuda_strict_math_enable=true` by default; uses stricter FP compile flags to reduce GPU/CPU drift.
+  - `strict_kernel_verify=false` by default; enabling it enforces strict GPU-vs-CPU startup parity checks and may reject unstable device/driver combos.
 - HiveOS wrapper keys for the same behavior:
   - `HYBRID_CPU_RESERVE_MIN_CORES`
   - `HYBRID_CPU_RESERVE_MAX_CORES`
   - `HYBRID_CPU_RESERVE_GPU_THRESHOLD`
+  - `CPU_ONLY_RESERVE_SYSTEM_CORE`
+  - `CPU_ONLY_RESERVED_CORES`
+  - `GPU_CPU_VERIFY` (for example `ox8=off,hoohash=on,autolykosv2=off`)
+  - `GPU_OPENCL_MAD_ENABLE` (for example `hoohash=off`)
+  - `GPU_OPENCL_NATIVE_MATH_ENABLE` (for example `hoohash=off`)
+  - `GPU_OPENCL_ACCURACY_BOOST` (for example `hoohash=on`)
+  - `GPU_STRICT_JOB` (for example `ox8=off,hoohash=off,autolykosv2=on`)
+  - `GPU_RECENT_JOB_MAX_IDS` (for example `hoohash=640`)
+  - `GPU_RECENT_JOB_MAX_AGE_MS` (for example `hoohash=1000`)
 - Optional benchmark telemetry uploads only performance/tuning metadata (hashrate, efficiency, temperatures, clocks, batch/autotune/backend/OC settings). No wallet/private-key secrets are sent.
 - `--coin unknown` disables coin-specific wallet validation while benchmark telemetry/insights remain available
-- CPU mining supports `ox8` and `randomx`; `autolykosv2` is GPU-only.
-- `--gpu-hash randomx` is not supported
+- CPU mining supports `ox8`, `hoohash`, `randomx`, and `autolykosv2`.
 - `--gpu-hash autolykosv2`: NVIDIA runs via CUDA, AMD/Intel runs via OpenCL
 - Autolykos block tuning can be pinned with `--autolykos-block-size <N>` or `mining.runtime.autolykos_block_size` (`>=64`, divisible by `8`).
-- Dev-fee mining for `ox8` uses a fixed developer pool set (`stratum+tcp://stratum.cryptix-network.org:13094` with failover `stratum+tcp://cytx.baikalmine.com:9010`), fixed dev wallet, and always Stratum v1.
-- Dev-fee mining for `randomx` uses a fixed developer pool set (`pool.hashvault.pro:443` with failover `xmr-eu1.nanopool.org:10300`), fixed dev wallet, and always Stratum v1.
-- Dev-fee mining for `autolykosv2` uses fixed developer pools (`stratum+tcp://us.ergo.herominers.com:1180` with failover `stratum+tcp://de.ergo.herominers.com:1180`), fixed dev wallet, and always Stratum v1.
-
-## Frontend
+## Frontend Runtime Notes
 
 - Embedded dashboard is enabled by default.
 - Default URL: `http://127.0.0.1:8943/`
@@ -241,7 +338,11 @@ cryptis-miner <COMMAND> --help
 - `--cpu-coin <COIN>` - CPU target coin override
 - `--cpu-hash <HASH>` - CPU target hash override
 - `--gpu-coin <COIN>` - GPU target coin override
-- `--gpu-hash <HASH>` - GPU target hash override (`ox8` or `autolykosv2`)
+- `--gpu-hash <HASH>` - GPU target hash override (`ox8`, `hoohash`, or `autolykosv2`)
+- `--gpu-core-coin <COIN>` - GPU core-lane coin override (dual/triple)
+- `--gpu-core-hash <HASH>` - GPU core-lane hash override (dual/triple supports `ox8` and `hoohash`; `hoohash` core pair currently requires OpenCL)
+- `--gpu-memory-coin <COIN>` - GPU memory-lane coin override (dual/triple)
+- `--gpu-memory-hash <HASH>` - GPU memory-lane hash override (dual/triple currently expects `autolykosv2`)
 - `-a, --algorithm <NAME>` - hidden legacy selector (compatibility only)
 - `-p, --pool <URL>` - pool URL (`stratum+tcp://...` or `stratum+ssl://...`)
 - `--cpu-pool <URL>` - CPU pool URL override
@@ -256,6 +357,18 @@ cryptis-miner <COMMAND> --help
 - `--gpu-user <USER>` - GPU pool login override
 - `--gpu-password <PASS>` - GPU pool password override
 - `--gpu-wallet <WALLET>` - GPU wallet override
+- `--gpu-core-pool <URL>` - GPU core-lane pool URL override
+- `--gpu-core-failover-pools <URLS>` - GPU core-lane failover pools (comma-separated)
+- `--gpu-core-stratum-protocol <v1|v2>` - GPU core-lane Stratum protocol override
+- `--gpu-core-user <USER>` - GPU core-lane pool login override
+- `--gpu-core-password <PASS>` - GPU core-lane pool password override
+- `--gpu-core-wallet <WALLET>` - GPU core-lane wallet override
+- `--gpu-memory-pool <URL>` - GPU memory-lane pool URL override
+- `--gpu-memory-failover-pools <URLS>` - GPU memory-lane failover pools (comma-separated)
+- `--gpu-memory-stratum-protocol <v1|v2>` - GPU memory-lane Stratum protocol override
+- `--gpu-memory-user <USER>` - GPU memory-lane pool login override
+- `--gpu-memory-password <PASS>` - GPU memory-lane pool password override
+- `--gpu-memory-wallet <WALLET>` - GPU memory-lane wallet override
 - `--stratum-protocol <v1|v2>` - Stratum protocol version
 - `--stratum-protocol-fallback` / `--no-stratum-protocol-fallback` - try v1<->v2 fallback on protocol connect/authorize failure
 - `--stratum-transport <auto|tcp|tls>` - transport mode
@@ -279,6 +392,8 @@ cryptis-miner <COMMAND> --help
 ### CPU and GPU Routing
 
 - `-t, --threads <N>` - CPU thread count
+- `--cpu-only-reserve-system-core` / `--no-cpu-only-reserve-system-core` - toggle CPU-only system-core reservation
+- `--cpu-only-reserved-cores <N>` - reserved logical core count in CPU-only mode
 - `--cpu-affinity <IDS>` - bind CPU workers to core IDs (comma-separated)
 - `--no-cpu` - disable CPU mining
 - `--no-gpu` - disable GPU mining
@@ -296,6 +411,8 @@ cryptis-miner <COMMAND> --help
 - `--intensity-max <X>` - upper clamp for effective intensity
 - `--cpu-intensity <X>` - CPU intensity override
 - `--gpu-intensity <X>` - GPU intensity override
+- `--gpu-core-intensity <X>` - GPU core-lane intensity override (dual/triple)
+- `--gpu-memory-intensity <X>` - GPU memory-lane intensity override (dual/triple)
 - `--cpu-batch-base <N>` - CPU batch baseline
 - `--cpu-batch-min <N>` - CPU batch minimum
 - `--cpu-batch-max <N>` - CPU batch maximum
@@ -333,6 +450,16 @@ Autotune behavior:
 - `--share-queue-capacity <N>` - submit queue capacity
 - `--recent-job-max-ids <N>` - recent-job cache size
 - `--recent-job-max-age-ms <MS>` - recent-job cache max age
+- `--gpu-cpu-verify <HASH=BOOL[,HASH=BOOL...]>` - per-hash GPU CPU-verify toggle (`ox8|hoohash|autolykosv2`)
+- `--gpu-opencl-mad-enable <HASH=BOOL[,HASH=BOOL...]>` - per-hash OpenCL MAD toggle (`ox8|hoohash|autolykosv2`)
+- `--gpu-opencl-native-math-enable <HASH=BOOL[,HASH=BOOL...]>` - per-hash experimental native OpenCL math toggle (`ox8|hoohash|autolykosv2`)
+- `--gpu-opencl-fp-contract-disable <HASH=BOOL[,HASH=BOOL...]>` - hoohash-only OpenCL FP contraction control (`hoohash`)
+- `--gpu-opencl-accuracy-boost <HASH=BOOL[,HASH=BOOL...]>` - per-hash experimental OpenCL accuracy boost (`hoohash` only, requires CPU verify)
+- `--gpu-cuda-strict-math-enable <HASH=BOOL[,HASH=BOOL...]>` - hoohash-only CUDA strict FP compile toggle (`hoohash`)
+- `--gpu-strict-kernel-verify <HASH=BOOL[,HASH=BOOL...]>` - hoohash-only strict GPU kernel parity verification toggle (`hoohash`)
+- `--gpu-strict-job <HASH=BOOL[,HASH=BOOL...]>` - per-hash strict-job toggle (`on` = only latest job)
+- `--gpu-recent-job-max-ids <HASH=N[,HASH=N...]>` - per-hash recent-job id window (used when strict-job is off)
+- `--gpu-recent-job-max-age-ms <HASH=MS[,HASH=MS...]>` - per-hash recent-job age window in milliseconds (used when strict-job is off)
 - `--job-recv-timeout-ms <MS>` - timeout for incoming jobs
 - `--stats-interval-ms <MS>` - stats update interval
 - `--gpu-status-board-interval-ms <MS>` - GPU status board interval (`0` disables)
@@ -350,6 +477,19 @@ Autotune behavior:
 - `--worker-active-poll-interval <N>` - loop interval for active-state checks
 - `--worker-stats-flush-threshold <N>` - hash threshold for stats flush
 - `--worker-stats-flush-interval-ms <MS>` - periodic stats flush interval
+
+Rule examples:
+
+- `--gpu-cpu-verify ox8=on,hoohash=on,autolykosv2=off`
+- `--gpu-opencl-mad-enable hoohash=off`
+- `--gpu-opencl-native-math-enable hoohash=off`
+- `--gpu-opencl-fp-contract-disable hoohash=on`
+- `--gpu-opencl-accuracy-boost hoohash=on`
+- `--gpu-cuda-strict-math-enable hoohash=on`
+- `--gpu-strict-kernel-verify hoohash=on`
+- `--gpu-strict-job ox8=off,hoohash=off,autolykosv2=on`
+- `--gpu-recent-job-max-ids hoohash=640`
+- `--gpu-recent-job-max-age-ms hoohash=1000`
 
 ### Backend Selection
 
@@ -405,6 +545,7 @@ Supported OC placeholders:
 - `--api-live` / `--api-disabled` - enable or disable REST API
 - `--api-bind <ADDR>` - API bind address
 - `--api-port <PORT>` - API port
+- `--api-token <TOKEN>` - require Bearer token for REST API endpoints
 - `--hive-stats-disabled` - disable Hive-compatible endpoint
 - `--hive-stats-path <PATH>` - custom Hive endpoint path
 
@@ -481,6 +622,6 @@ cryptis-miner config validate --file myconfig.toml
 
 #### Cryptis Miner does not allow mining on rplant.xyz (including subdomains/server IPs) due to ethical concerns regarding the operators. The software will terminate immediately upon startup; mining on the Rplant pool is not possible, but mining on all other pools is.
 
-## Support 
+## Support
 Support in Cryptix Network Discord (Cryptis Miner Channel):
 https://discord.cryptix-network.org/
