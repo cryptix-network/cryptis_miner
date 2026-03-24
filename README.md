@@ -31,21 +31,40 @@ It focuses on broad hardware compatibility, stable operation, and practical tuni
 
 ## Currently Supported Targets
 
-- `cryptix + ox8` (CPU/GPU)
-- `hoosat + hoohash` (CPU/GPU)
-- `pepepow + hoohash` (CPU/GPU)
-- `monero + randomx` (CPU-only)
-- `zephyr + randomx` (CPU-only)
-- `ergo + autolykosv2` (CPU/GPU)
-- `unknown + ox8` (CPU/GPU)
-- `unknown + hoohash` (CPU/GPU)
-- `unknown + randomx` (CPU-only)
-- `unknown + autolykosv2` (CPU/GPU)
+- `ox8` 1% DevFee | CPU + AMD + NVIDIA + INTEL (CUDA + OPENCL)
+- `hoohash` 2% DevFee | CPU + AMD + NVIDIA + INTEL (CUDA + OPENCL)
+- `randomx`  1% DevFee | CPU
+- `autolykosv2` 1% DevFee | CPU + AMD + NVIDIA + INTEL (CUDA + OPENCL)
 
-GPU runtime supports:
+CPU Mining (1 CPU Hash):
+- `ox8`
+- `hoohash`
+- `randomX`
+
+Hybrid Mining (1 CPU Hash + 1 GPU Hash):
+- `ox8` + `ox8` 
+- `ox8` + `hoohash`
+- `randomX` + `ox8` 
+- `randomX` + `hoohash`
+- `hoohash` + `hoohash` 
+- `hoohash` + `ox8`
+
+GPU Mining (1 GPU Hash):
 - `ox8`
 - `hoohash`
 - `autolykosv2`
+
+Multi GPU Mining (1 Core GPU Hash + 1 Memory GPU Hash parallel on the GPU):
+- `ox8` + `autolykosv2`
+- `hoohash` + `autolykosv2`
+
+Tripple Mining ( 1 CPU Hash + 1 Core GPU Hash + 1 Memory GPU Hash)
+- `ox8` + `ox8` + `autolykosv2`
+- `ox8` + `hoohash` + `autolykosv2`
+- `randomX` + `ox8` + `autolykosv2`
+- `randomX` + `hoohash` + `autolykosv2`
+- `hoohash` + `hoohash` + `autolykosv2`
+- `hoohash` + `ox8` + `autolykosv2`
 
 ## What It Supports
 
