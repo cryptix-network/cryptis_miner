@@ -7,10 +7,13 @@
 # Mining target (global default)
 # Supported coin/hash pairs:
 # - cryptix + ox8
+# - hoosat + hoohash
+# - pepepow + hoohash
 # - monero + randomx
 # - zephyr + randomx
 # - ergo + autolykosv2
 # - unknown + ox8
+# - unknown + hoohash
 # - unknown + randomx
 # - unknown + autolykosv2
 # coin="unknown" enables generic hash-only mode:
@@ -49,7 +52,8 @@ wallet_address = "YOUR_WALLET_ADDRESS"
 # password = "x"
 
 # Reconnect behavior
-retry_count = 0       # 0 = unlimited
+retry_count = 50      # primary endpoint retries (0 = unlimited)
+failover_retry_count = 0 # failover endpoint retries (0 = unlimited)
 retry_delay_ms = 5000 # base delay in ms
 
 # Pool timeouts/queues
@@ -112,6 +116,9 @@ intensity = 1.0
 # Optional per-device-class intensity overrides
 # cpu_intensity = 1.0
 # gpu_intensity = 1.0
+# Optional dual/triple GPU lane intensity overrides
+# gpu_core_intensity = 0.55
+# gpu_memory_intensity = 0.45
 
 # Mode toggles
 no_cpu = false
@@ -133,6 +140,15 @@ no_gpu = false
 # cpu_hash = "ox8"
 # gpu_coin = "cryptix"
 # gpu_hash = "ox8"
+#
+# Optional dual/triple GPU lane overrides.
+# Supported pairs in this release:
+# - gpu_core_hash=ox8 + gpu_memory_hash=autolykosv2 (OpenCL and CUDA)
+# - gpu_core_hash=hoohash + gpu_memory_hash=autolykosv2 (OpenCL-only)
+# gpu_core_coin = "unknown"
+# gpu_core_hash = "ox8"
+# gpu_memory_coin = "unknown"
+# gpu_memory_hash = "autolykosv2"
 
 # Optional per-device pool overrides.
 # Use this when CPU/GPU mine different targets and require different pool endpoints.
@@ -152,6 +168,23 @@ no_gpu = false
 # stratum_protocol = "v2"
 # user = "anonymous"
 # wallet_address = "YOUR_GPU_WALLET"
+# password = "x"
+#
+# Optional dual/triple lane-specific pool overrides (inherit from [pool] and [mining.gpu_pool]):
+# [mining.gpu_core_pool]
+# url = "stratum+tcp://ox8-core-pool.example.com:4444"
+# failover_urls = ["stratum+tcp://ox8-core-backup.example.com:4444"]
+# stratum_protocol = "v1"
+# user = "anonymous"
+# wallet_address = "YOUR_GPU_CORE_WALLET"
+# password = "x"
+#
+# [mining.gpu_memory_pool]
+# url = "stratum+tcp://autolykos-memory-pool.example.com:5555"
+# failover_urls = ["stratum+tcp://autolykos-memory-backup.example.com:5555"]
+# stratum_protocol = "v1"
+# user = "anonymous"
+# wallet_address = "YOUR_GPU_MEMORY_WALLET"
 # password = "x"
 
 [mining.overclock]
@@ -220,6 +253,11 @@ job_receive_timeout_ms = 500
 stats_interval_ms = 5000
 gpu_status_board_interval_ms = 30000 # 0 disables status board
 
+# CPU-only reservation policy:
+# Keep at least one logical core free for OS/background tasks while mining CPU-only.
+cpu_only_reserve_system_core = true
+cpu_only_reserved_cores = 1
+
 # Hybrid CPU reservation policy:
 # If gpu_count <= threshold => reserve min cores, else reserve max cores.
 # Final reserve is clamped so at least 1 CPU thread remains active.
@@ -232,9 +270,9 @@ opencl_autotune_enabled = true
 cuda_autotune_enabled = true
 cpu_autotune_enabled = true
 # CPU autotune probe duration per candidate (ms)
-cpu_autotune_probe_ms = 600
+cpu_autotune_probe_ms = 400
 # GPU autotune runs per (lws,batch) candidate (median score over successful runs)
-gpu_autotune_rounds = 3
+gpu_autotune_rounds = 2
 
 # Manual OpenCL launch values (used only when opencl_autotune_enabled=false)
 # opencl_batch_size = 262144
@@ -262,6 +300,68 @@ worker_slice_check_interval = 64
 worker_active_poll_interval = 64
 worker_stats_flush_threshold = 4194304
 worker_stats_flush_interval_ms = 1000
+
+# Per-GPU-hash share policy:
+# - cpu_verify: CPU re-check of GPU candidate nonce/hash before submit
+# - opencl_mad_enable: OpenCL compiler `-cl-mad-enable` toggle per hash
+# - opencl_native_math_enable (experimental): enables native_* transcendental math path in OpenCL kernel
+# - opencl_fp_contract_disable (hoohash-only): forces OpenCL `FP_CONTRACT OFF` in the hoohash kernel build
+# - opencl_accuracy_boost (experimental, hoohash-only): slightly relaxes GPU prefilter so CPU verify can recover more valid shares near precision boundaries
+# - cuda_strict_math_enable (hoohash-only): compiles CUDA with strict FP options (`fmad=false`, `ftz=false`, `prec_div/sqrt=true`)
+# - cuda_accuracy_boost (experimental, hoohash-only): slightly relaxes CUDA GPU prefilter so CPU verify can recover more valid shares near precision boundaries
+# - strict_kernel_verify (hoohash-only): enforce strict GPU-vs-CPU startup parity checks (safer, can reject devices with FP drift)
+# - strict_job: accept only latest job id (drop queued shares on job switch)
+# - recent_job_*: only used as stale window when strict_job=false
+#
+# Defaults requested:
+# - ox8: strict_job=false, window 64 / 8000ms
+# - hoohash: strict_job=false, window 640 / 1000ms, `cpu_verify=false`, `opencl_fp_contract_disable=true`, `cuda_strict_math_enable=true`, `strict_kernel_verify=true`
+# - autolykosv2: strict_job=true
+# Experimental CLI override example:
+# --gpu-opencl-native-math-enable hoohash=on
+# --gpu-opencl-fp-contract-disable hoohash=on
+# --gpu-opencl-accuracy-boost hoohash=on
+# --gpu-cuda-strict-math-enable hoohash=on
+# --gpu-cuda-accuracy-boost hoohash=on
+# --gpu-strict-kernel-verify hoohash=on
+[mining.runtime.gpu_hash_policies.ox8]
+cpu_verify = false
+opencl_mad_enable = true
+opencl_native_math_enable = false
+opencl_fp_contract_disable = false
+opencl_accuracy_boost = false
+cuda_strict_math_enable = false
+cuda_accuracy_boost = false
+strict_kernel_verify = false
+strict_job = false
+recent_job_max_ids = 64
+recent_job_max_age_ms = 8000
+
+[mining.runtime.gpu_hash_policies.hoohash]
+cpu_verify = false
+opencl_mad_enable = false
+opencl_native_math_enable = false
+opencl_fp_contract_disable = true
+opencl_accuracy_boost = false
+cuda_strict_math_enable = true
+cuda_accuracy_boost = false
+strict_kernel_verify = true
+strict_job = false
+recent_job_max_ids = 640
+recent_job_max_age_ms = 1000
+
+[mining.runtime.gpu_hash_policies.autolykosv2]
+cpu_verify = false
+opencl_mad_enable = true
+opencl_native_math_enable = false
+opencl_fp_contract_disable = false
+opencl_accuracy_boost = false
+cuda_strict_math_enable = false
+cuda_accuracy_boost = false
+strict_kernel_verify = false
+strict_job = true
+recent_job_max_ids = 64
+recent_job_max_age_ms = 8000
 
 [api]
 enabled = true
