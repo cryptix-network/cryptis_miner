@@ -662,20 +662,44 @@ apply_cli_extra_arg_overrides
 
 if [[ -z "${coin}" || -z "${hash_name}" ]]; then
   case "$(normalize_lower "${algorithm}")" in
-    ""|"cryptix-ox8"|"cryptixox8"|"ox8")
+    ""|"cryptix"|"cryptix-ox8"|"cryptixox8"|"cryptix+ox8"|"ox8")
       coin="${coin:-cryptix}"
       hash_name="${hash_name:-ox8}"
       ;;
-    "hoohash"|"hoo-hash"|"hoosat"|"pepepow")
+    "hoohash"|"hoo-hash"|"hoosat"|"hoosat-hoohash"|"hoosat+hoohash")
       coin="${coin:-hoosat}"
       hash_name="${hash_name:-hoohash}"
       ;;
-    "randomx"|"random-x"|"rx"|"rx/0"|"rx-0")
+    "pepepow"|"pepepow-hoohash"|"pepepow+hoohash")
+      coin="${coin:-pepepow}"
+      hash_name="${hash_name:-hoohash}"
+      ;;
+    "randomx"|"random-x"|"rx"|"rx/0"|"rx-0"|"monero"|"monero-randomx"|"monero+randomx")
       coin="${coin:-monero}"
       hash_name="${hash_name:-randomx}"
       ;;
-    "autolykosv2"|"autolykos-v2"|"autolykos2"|"autolykos")
+    "zephyr"|"zephyr-randomx"|"zephyr+randomx")
+      coin="${coin:-zephyr}"
+      hash_name="${hash_name:-randomx}"
+      ;;
+    "autolykosv2"|"autolykos-v2"|"autolykos2"|"autolykos"|"ergo"|"ergo-autolykosv2"|"ergo+autolykosv2")
       coin="${coin:-ergo}"
+      hash_name="${hash_name:-autolykosv2}"
+      ;;
+    "unknown-ox8"|"unknown+ox8")
+      coin="${coin:-unknown}"
+      hash_name="${hash_name:-ox8}"
+      ;;
+    "unknown-hoohash"|"unknown+hoohash")
+      coin="${coin:-unknown}"
+      hash_name="${hash_name:-hoohash}"
+      ;;
+    "unknown-randomx"|"unknown+randomx")
+      coin="${coin:-unknown}"
+      hash_name="${hash_name:-randomx}"
+      ;;
+    "unknown-autolykosv2"|"unknown+autolykosv2")
+      coin="${coin:-unknown}"
       hash_name="${hash_name:-autolykosv2}"
       ;;
     *)
