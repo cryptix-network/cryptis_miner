@@ -10,9 +10,8 @@ It focuses on broad hardware compatibility, stable operation, and practical tuni
 ## Documentation Guide
 
 - Installation/platform setup: [INSTALL.md](INSTALL.md)
-- Batch starter scripts (Windows): [batch/README.md](batch/README.md)
+- Batch starter scripts (Windows): [batch/README.md](tools/README_BAT.md)
 - API reference: [API.md](API.md)
-- Stratum details: [STRATUM_PROTOCOL_INFO.md](STRATUM_PROTOCOL_INFO.md)
 - Known issues: [BUGS.md](BUGS.md)
 
 ## Table of Contents
