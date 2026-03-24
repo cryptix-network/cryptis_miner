@@ -82,13 +82,14 @@ Start example:
 
 ## HiveOS install (Custom Miner)
 
-Install binary on rig (replace URL with your Linux release asset URL):
+Install the full HiveOS package on rig (replace URL with your HiveOS `.tar.gz` release asset URL):
 
 ```bash
-sudo mkdir -p /hive/miners/custom/cryptis-miner
-cd /hive/miners/custom/cryptis-miner
-sudo curl -L "<LINUX_RELEASE_ASSET_URL>" -o cryptis-miner
-sudo chmod +x cryptis-miner
+cd /hive/miners/custom
+sudo curl -L "<HIVEOS_RELEASE_ASSET_URL>" -o cryptis_miner_hiveos_v101.tar.gz
+sudo tar -xzf cryptis_miner_hiveos_v101.tar.gz
+cd /hive/miners/custom/cryptis_miner_hiveos_v101
+sudo chmod +x cryptis-miner h-run.sh h-config.sh h-stats.sh
 ```
 
 OpenCL on HiveOS: normally included with GPU drivers.  
