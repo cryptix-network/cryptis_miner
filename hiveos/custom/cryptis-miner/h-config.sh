@@ -456,6 +456,210 @@ normalize_optional_hash() {
   canonical_hash "${raw}"
 }
 
+# Promote selected HiveOS "Extra config arguments" so validation matches
+# the final miner command users see in the UI.
+apply_cli_extra_arg_overrides() {
+  local -a parts=()
+  local index=0
+  local part=""
+  local next=""
+  local normalized_extra_args=""
+
+  if [[ -z "${extra_args}" ]]; then
+    return 0
+  fi
+
+  normalized_extra_args="${extra_args//$'\r'/ }"
+  normalized_extra_args="${normalized_extra_args//$'\n'/ }"
+
+  # HiveOS may provide one CLI arg per line in the UI.
+  read -r -a parts <<< "${normalized_extra_args}"
+
+  while (( index < ${#parts[@]} )); do
+    part="${parts[index]}"
+    next=""
+    if (( index + 1 < ${#parts[@]} )); then
+      next="${parts[index + 1]}"
+    fi
+
+    case "${part}" in
+      --algo|--algorithm)
+        if [[ -n "${next}" ]]; then
+          algorithm="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --algo=*|--algorithm=*)
+        algorithm="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --coin)
+        if [[ -n "${next}" ]]; then
+          coin="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --coin=*)
+        coin="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --hash)
+        if [[ -n "${next}" ]]; then
+          hash_name="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --hash=*)
+        hash_name="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --cpu-coin)
+        if [[ -n "${next}" ]]; then
+          cpu_coin="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --cpu-coin=*)
+        cpu_coin="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --cpu-hash)
+        if [[ -n "${next}" ]]; then
+          cpu_hash="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --cpu-hash=*)
+        cpu_hash="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-coin)
+        if [[ -n "${next}" ]]; then
+          gpu_coin="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-coin=*)
+        gpu_coin="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-hash)
+        if [[ -n "${next}" ]]; then
+          gpu_hash="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-hash=*)
+        gpu_hash="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-core-coin)
+        if [[ -n "${next}" ]]; then
+          gpu_core_coin="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-core-coin=*)
+        gpu_core_coin="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-core-hash)
+        if [[ -n "${next}" ]]; then
+          gpu_core_hash="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-core-hash=*)
+        gpu_core_hash="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-memory-coin)
+        if [[ -n "${next}" ]]; then
+          gpu_memory_coin="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-memory-coin=*)
+        gpu_memory_coin="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-memory-hash)
+        if [[ -n "${next}" ]]; then
+          gpu_memory_hash="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-memory-hash=*)
+        gpu_memory_hash="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --gpu-backend)
+        if [[ -n "${next}" ]]; then
+          gpu_backend="${next}"
+          ((index += 2))
+          continue
+        fi
+        ;;
+      --gpu-backend=*)
+        gpu_backend="${part#*=}"
+        ((index += 1))
+        continue
+        ;;
+      --no-cpu)
+        no_cpu=1
+        ((index += 1))
+        continue
+        ;;
+      --no-gpu)
+        no_gpu=1
+        ((index += 1))
+        continue
+        ;;
+      --no-cuda)
+        no_cuda=1
+        ((index += 1))
+        continue
+        ;;
+      --no-opencl)
+        no_opencl=1
+        ((index += 1))
+        continue
+        ;;
+      --cuda-experimental)
+        cuda_experimental=1
+        ((index += 1))
+        continue
+        ;;
+    esac
+
+    ((index += 1))
+  done
+}
+
+apply_cli_extra_arg_overrides
+
 if [[ -z "${coin}" || -z "${hash_name}" ]]; then
   case "$(normalize_lower "${algorithm}")" in
     ""|"cryptix-ox8"|"cryptixox8"|"ox8")
