@@ -1,11 +1,31 @@
 @echo off
+setlocal
+cd /d "%~dp0"
+
+set "SCRIPT_DIR=%~dp0"
+for %%I in ("%SCRIPT_DIR%..") do set "ROOT_DIR=%%~fI"
+
+set "MINER_EXE=%ROOT_DIR%\cryptis-miner.exe"
+if not exist "%MINER_EXE%" set "MINER_EXE=%ROOT_DIR%\target\release\cryptis-miner.exe"
+if not exist "%MINER_EXE%" set "MINER_EXE=%SCRIPT_DIR%cryptis-miner.exe"
+if not exist "%MINER_EXE%" set "MINER_EXE=%SCRIPT_DIR%target\release\cryptis-miner.exe"
+if not exist "%MINER_EXE%" (
+    echo [ERROR] Could not find cryptis-miner.exe
+    echo [ERROR] Looked in:
+    echo [ERROR]   "%ROOT_DIR%\cryptis-miner.exe"
+    echo [ERROR]   "%ROOT_DIR%\target\release\cryptis-miner.exe"
+    echo [ERROR]   "%SCRIPT_DIR%cryptis-miner.exe"
+    echo [ERROR]   "%SCRIPT_DIR%target\release\cryptis-miner.exe"
+    pause
+    exit /b 1
+)
 REM Cryptis Miner Start Script
 
 REM Pool URL 
 :: set POOL_URL=stratum+tcp://127.0.0.1:13094
 :: set POOL_URL=stratum+tcp://stratum.cryptix-network.org:13094
 
-set POOL_URL=stratum+tcp://127.0.0.1:13094
+set POOL_URL=stratum+tcp://stratum.cryptix-network.org:13094
 
 REM Mining wallet address 
 set WALLET=cryptix:qrp4feqvf3u0ehge7hpq5agpn8m5p68akh7s6lzjcvhj8p2qt02sxysjztlma
@@ -17,7 +37,7 @@ REM Pool password (usually "x" or empty)
 set POOL_PASSWORD=x
 
 REM Number of CPU threads to use (leave empty for auto-detect)
-set THREADS=6
+set THREADS=10
 
 REM Optional CPU affinity list (comma-separated cores, e.g. 0,2,4,6)
 set CPU_AFFINITY=
@@ -218,9 +238,13 @@ if not "%CUDA_EXPERIMENTAL%"=="" (
 )
 
 if "%THREADS%"=="" (
-    target\release\cryptis-miner.exe  --pool %POOL_URL% --stratum-transport %STRATUM_TRANSPORT% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --coin %COIN% --hash %HASH% %EXTRA_ARGS%
+    "%MINER_EXE%"  --pool %POOL_URL% --stratum-transport %STRATUM_TRANSPORT% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --coin %COIN%  --hash %HASH% %EXTRA_ARGS%
 ) else (
-    target\release\cryptis-miner.exe  --pool %POOL_URL% --stratum-transport %STRATUM_TRANSPORT% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --threads %THREADS% --coin %COIN% --hash %HASH% %EXTRA_ARGS%
+    "%MINER_EXE%"  --pool %POOL_URL% --stratum-transport %STRATUM_TRANSPORT% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --threads %THREADS% --coin %COIN% --hash %HASH% %EXTRA_ARGS%
 )
 
 pause
+
+::--stratum-protocol v2
+
+

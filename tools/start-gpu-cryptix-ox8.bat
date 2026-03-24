@@ -31,7 +31,15 @@ set CUDA_DEVICES=
 set OPENCL_DEVICES=
 set GPU_BACKEND=auto
 set NO_CUDA=0
-set NO_OPENCL=0
+set NO_OPENCL=0
+REM Quick GPU options (set as needed)
+REM   CUDA experimental: set CUDA_EXPERIMENTAL=1
+REM   Faster autotune:  set GPU_AUTOTUNE_ROUNDS=1
+REM   GPU intensity:    set GPU_INTENSITY=0.95
+set CUDA_EXPERIMENTAL=0
+set GPU_INTENSITY=
+set GPU_AUTOTUNE_ROUNDS=
+set GPU_CUDA_ACCURACY_BOOST=
 
 set EXTRA_ARGS=
 if not "%GPU_DEVICES%"=="" (
@@ -52,8 +60,22 @@ if "%NO_CUDA%"=="1" (
 if "%NO_OPENCL%"=="1" (
     set EXTRA_ARGS=%EXTRA_ARGS% --no-opencl
 )
+if not "%GPU_CUDA_ACCURACY_BOOST%"=="" (
+    set EXTRA_ARGS=%EXTRA_ARGS% --gpu-cuda-accuracy-boost %GPU_CUDA_ACCURACY_BOOST%
+)
+if "%CUDA_EXPERIMENTAL%"=="1" (
+    set EXTRA_ARGS=%EXTRA_ARGS% --cuda-experimental
+)
+if not "%GPU_INTENSITY%"=="" (
+    set EXTRA_ARGS=%EXTRA_ARGS% --gpu-intensity %GPU_INTENSITY%
+)
+if not "%GPU_AUTOTUNE_ROUNDS%"=="" (
+    set EXTRA_ARGS=%EXTRA_ARGS% --gpu-autotune-rounds %GPU_AUTOTUNE_ROUNDS%
+)
 
 "%MINER_EXE%" --pool %POOL_URL% --wallet %WALLET% --worker %WORKER_NAME% --password %POOL_PASSWORD% --coin cryptix --hash ox8 --no-cpu %EXTRA_ARGS%
 
 pause
+
+
 
