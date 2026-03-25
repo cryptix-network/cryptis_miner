@@ -118,10 +118,25 @@ nvcc --version
 
 ### HiveOS Custom Flight Sheet (quick idea)
 
-Use a Custom miner entry and pass config in `CUSTOM_URL` style. Example:
+Use a Custom miner entry and pass config in either of these forms:
+
+- Dedicated HiveOS fields: set `Pool URL`, `Wallet and worker template`, `Pass`, then put extra flags like `COIN:cryptix,HASH:ox8,NO_CPU:1,GPU_BACKEND:opencl` into `CUSTOM_USER_CONFIG`.
+- CSV style: put everything in `CUSTOM_URL` or `CUSTOM_USER_CONFIG`.
+
+The wrapper also resolves common HiveOS macros such as `%URL%`, `%URL_HOST%`, `%URL_PORT%`, `%WAL%`, and `%WORKER_NAME%`.
+It accepts both Cryptis-style keys such as `POOL`, `TEMPLATE`, `PASS` and HiveOS-style keys such as `POOL`, `WALLET`, `WORKER`, `PASS`.
+Raw CLI passthrough is only applied when a `CUSTOM_USER_CONFIG` line starts with `-`/`--`; CSV `KEY:VALUE` entries are consumed by the wrapper and are not forwarded as stray miner arguments.
+
+Full CSV example:
 
 ```text
 POOL:stratum+tcp://POOL:PORT,TEMPLATE:YOUR_WALLET.rig01,PASS:x,COIN:cryptix,HASH:ox8,GPU_BACKEND:opencl,NO_CPU:1
+```
+
+Official HiveOS-style CSV example:
+
+```text
+POOL:stratum+tcp://POOL:PORT,WALLET:%WAL%,WORKER:%WORKER_NAME%,PASS:x,COIN:cryptix,HASH:ox8,GPU_BACKEND:opencl,NO_CPU:1
 ```
 
 RandomX example:

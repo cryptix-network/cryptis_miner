@@ -36,6 +36,35 @@ is_true() {
   [[ "${value}" == "1" || "${value}" == "true" || "${value}" == "yes" || "${value}" == "on" ]]
 }
 
+redact_command_for_log() {
+  local -a redacted=()
+  local redact_next=0
+  local arg=""
+
+  for arg in "$@"; do
+    if (( redact_next )); then
+      redacted+=("***")
+      redact_next=0
+      continue
+    fi
+
+    case "${arg}" in
+      --api-token|--frontend-password|--bench-report-api-key|--password|--cpu-password|--gpu-password|--gpu-core-password|--gpu-memory-password)
+        redacted+=("${arg}")
+        redact_next=1
+        ;;
+      --api-token=*|--frontend-password=*|--bench-report-api-key=*|--password=*|--cpu-password=*|--gpu-password=*|--gpu-core-password=*|--gpu-memory-password=*)
+        redacted+=("${arg%%=*}=***")
+        ;;
+      *)
+        redacted+=("${arg}")
+        ;;
+    esac
+  done
+
+  printf '%q ' "${redacted[@]}"
+}
+
 if [[ -n "${API_TOKEN:-}" ]]; then
   command+=(--api-token "${API_TOKEN}")
 fi
@@ -576,5 +605,5 @@ if [[ -n "${EXTRA_ARGS:-}" ]]; then
 fi
 
 echo "Starting ${CUSTOM_NAME} ${CUSTOM_VERSION}"
-echo "Command: ${command[*]}"
+echo "Command: $(redact_command_for_log "${command[@]}")"
 exec "${command[@]}"

@@ -32,6 +32,10 @@ fetch_json() {
   fi
 }
 
+finish_h_stats() {
+  return 0 2>/dev/null || exit 0
+}
+
 response="$(fetch_json "${endpoint}")"
 
 if [[ -z "${response}" && "${fallback_endpoint}" != "${endpoint}" ]]; then
@@ -41,7 +45,7 @@ fi
 if [[ -z "${response}" ]]; then
   khs=0
   stats="{}"
-  exit 0
+  finish_h_stats
 fi
 
 if command -v jq >/dev/null 2>&1; then

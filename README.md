@@ -295,6 +295,10 @@ Hybrid script note:
   - `GPU_STRICT_JOB` (for example `ox8=off,hoohash=off,autolykosv2=on`)
   - `GPU_RECENT_JOB_MAX_IDS` (for example `hoohash=640`)
   - `GPU_RECENT_JOB_MAX_AGE_MS` (for example `hoohash=1000`)
+  - Pool/user input can come from the classic `CUSTOM_URL` CSV, dedicated HiveOS pool/template fields, or `CUSTOM_USER_CONFIG` CSV keys such as `POOL`, `TEMPLATE`, `WALLET`, `WORKER`, `USER`, and `PASS`
+  - Common HiveOS macros are resolved in wrapper inputs: `%URL%`, `%URL_HOST%`, `%URL_PORT%`, `%WAL%`, `%WALLET%`, `%WORKER_NAME%`
+  - Literal `null`/`none` in `Wallet and worker template` is treated as empty so the official HiveOS `POOL:...,WALLET:%WAL%,WORKER:%WORKER_NAME%` format works
+  - Raw CLI passthrough from `CUSTOM_USER_CONFIG` only happens for lines that start with `-`/`--`; CSV `KEY:VALUE` entries are parsed by the wrapper and not appended as unknown miner arguments
 - Optional benchmark telemetry uploads only performance/tuning metadata (hashrate, efficiency, temperatures, clocks, batch/autotune/backend/OC settings). No wallet/private-key secrets are sent.
 - `--coin unknown` disables coin-specific wallet validation while benchmark telemetry/insights remain available
 - CPU mining supports `ox8`, `hoohash`, `randomx`, and `autolykosv2`.

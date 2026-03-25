@@ -5,6 +5,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 source "${SCRIPT_DIR}/h-manifest.conf"
 
+load_hive_conf_file() {
+  local conf_path="${1:-}"
+
+  if [[ -z "${conf_path}" || ! -f "${conf_path}" ]]; then
+    return 0
+  fi
+
+  set -o allexport
+  # shellcheck disable=SC1090
+  source "${conf_path}"
+  set +o allexport
+}
+
+load_hive_confs() {
+  load_hive_conf_file "${RIG_CONF:-/hive-config/rig.conf}"
+  load_hive_conf_file "${WALLET_CONF:-/hive-config/wallet.conf}"
+}
+
+load_hive_confs
+
 trim() {
   local value="$1"
   value="${value#"${value%%[![:space:]]*}"}"
@@ -18,11 +38,134 @@ trim_named_var() {
   printf -v "${name}" '%s' "$(trim "${value}")"
 }
 
+first_non_empty() {
+  local candidate=""
+  for candidate in "$@"; do
+    candidate="$(trim "${candidate}")"
+    if [[ -n "${candidate}" ]]; then
+      printf '%s' "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+build_pool_url_from_host_port() {
+  local host
+  local port
+
+  host="$(trim "${1:-}")"
+  port="$(trim "${2:-}")"
+
+  if [[ -z "${host}" ]]; then
+    printf ''
+    return 0
+  fi
+
+  if [[ "${host}" == *"://"* ]]; then
+    if [[ -n "${port}" && "${host}" != *":${port}" ]]; then
+      printf '%s:%s' "${host}" "${port}"
+    else
+      printf '%s' "${host}"
+    fi
+    return 0
+  fi
+
+  if [[ -n "${port}" ]]; then
+    printf 'stratum+tcp://%s:%s' "${host}" "${port}"
+  else
+    printf 'stratum+tcp://%s' "${host}"
+  fi
+}
+
+resolve_hive_macros() {
+  local value="${1:-}"
+  local resolved_url=""
+  local resolved_url_host=""
+  local resolved_url_port=""
+  local resolved_wallet=""
+  local resolved_worker=""
+
+  resolved_url="$(first_non_empty "${URL:-}" "${POOL_URL:-}" "${CUSTOM_POOL_URL:-}" "${CUSTOM_POOL:-}")" || true
+  resolved_url_host="$(first_non_empty "${URL_HOST:-}" "${POOL_HOST:-}" "${CUSTOM_POOL_HOST:-}")" || true
+  resolved_url_port="$(first_non_empty "${URL_PORT:-}" "${POOL_PORT:-}" "${CUSTOM_POOL_PORT:-}")" || true
+  resolved_wallet="$(first_non_empty "${WAL:-}" "${WALLET:-}" "${CUSTOM_WALLET:-}")" || true
+  resolved_worker="$(first_non_empty "${WORKER_NAME:-}" "${WORKER:-}")" || true
+
+  if [[ -n "${resolved_url}" ]]; then
+    value="${value//%URL%/${resolved_url}}"
+  fi
+  if [[ -n "${resolved_url_host}" ]]; then
+    value="${value//%URL_HOST%/${resolved_url_host}}"
+  fi
+  if [[ -n "${resolved_url_port}" ]]; then
+    value="${value//%URL_PORT%/${resolved_url_port}}"
+  fi
+  if [[ -n "${resolved_wallet}" ]]; then
+    value="${value//%WAL%/${resolved_wallet}}"
+    value="${value//%WALLET%/${resolved_wallet}}"
+  fi
+  if [[ -n "${resolved_worker}" ]]; then
+    value="${value//%WORKER_NAME%/${resolved_worker}}"
+    value="${value//%WORKER%/${resolved_worker}}"
+  fi
+
+  printf '%s' "${value}"
+}
+
 normalize_extra_args() {
   local value="${1:-}"
   value="${value//$'\r'/ }"
   value="${value//$'\n'/ }"
   printf '%s' "$(trim "${value}")"
+}
+
+extract_cli_extra_args() {
+  local raw="${1:-}"
+  local trimmed_raw=""
+  local line=""
+  local trimmed_line=""
+  local collected=""
+
+  trimmed_raw="$(trim "${raw}")"
+  if [[ -z "${trimmed_raw}" ]]; then
+    printf ''
+    return 0
+  fi
+
+
+  if [[ "${trimmed_raw}" == -* ]]; then
+    printf '%s' "${trimmed_raw}"
+    return 0
+  fi
+
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    trimmed_line="$(trim "${line}")"
+    if [[ -z "${trimmed_line}" || "${trimmed_line}" != -* ]]; then
+      continue
+    fi
+    if [[ -n "${collected}" ]]; then
+      collected+=" "
+    fi
+    collected+="${trimmed_line}"
+  done <<< "${raw}"
+
+  printf '%s' "${collected}"
+}
+
+normalize_hive_optional_value() {
+  local value
+  value="$(trim "${1:-}")"
+
+  case "${value,,}" in
+    ""|"null"|"none"|"nil")
+      printf ''
+      ;;
+    *)
+      printf '%s' "${value}"
+      ;;
+  esac
 }
 
 kv_from_csv() {
@@ -72,7 +215,7 @@ kv_from_csv() {
 
 is_known_csv_key() {
   case "${1^^}" in
-    "POOL"|"TEMPLATE"|"PASS"|"PROTO"|"PROTO_FALLBACK"|"STRATUM_PROTOCOL_FALLBACK"|"TRANSPORT"|"ALGO"|"COIN"|"HASH"|"RANDOMX_HUGEPAGES"|"RANDOMX_MSR"|"CPU_COIN"|"CPU_HASH"|"GPU_COIN"|"GPU_HASH"|"GPU_CORE_COIN"|"GPU_CORE_HASH"|"GPU_MEMORY_COIN"|"GPU_MEMORY_HASH"|"CPU_POOL"|"CPU_FAILOVER_POOLS"|"CPU_PROTO"|"CPU_STRATUM_PROTOCOL"|"CPU_USER"|"CPU_PASSWORD"|"CPU_WALLET"|"GPU_POOL"|"GPU_FAILOVER_POOLS"|"GPU_PROTO"|"GPU_STRATUM_PROTOCOL"|"GPU_USER"|"GPU_PASSWORD"|"GPU_WALLET"|"GPU_CORE_POOL"|"GPU_CORE_FAILOVER_POOLS"|"GPU_CORE_PROTO"|"GPU_CORE_STRATUM_PROTOCOL"|"GPU_CORE_USER"|"GPU_CORE_PASSWORD"|"GPU_CORE_WALLET"|"GPU_MEMORY_POOL"|"GPU_MEMORY_FAILOVER_POOLS"|"GPU_MEMORY_PROTO"|"GPU_MEMORY_STRATUM_PROTOCOL"|"GPU_MEMORY_USER"|"GPU_MEMORY_PASSWORD"|"GPU_MEMORY_WALLET"|"WORKER"|"API_BIND"|"API_PORT"|"API_TOKEN"|"FRONTEND_BIND"|"FRONTEND_PORT"|"FRONTEND_DISABLED"|"FRONTEND_LOGS_DISABLED"|"FRONTEND_PASSWORD_ENABLED"|"FRONTEND_PASSWORD"|"FRONTEND_RATE_LIMIT_PER_MINUTE"|"BENCH_REPORT"|"BENCH_REPORT_INTERVAL_SEC"|"BENCH_REPORT_ID_FILE"|"BENCH_REPORT_API_KEY"|"BENCH_INSIGHTS"|"NO_CPU"|"NO_GPU"|"GPU_DEVICES"|"CUDA_DEVICES"|"OPENCL_DEVICES"|"GPU_BACKEND"|"CUDA_EXPERIMENTAL"|"INTENSITY"|"INTENSITY_MIN"|"INTENSITY_MAX"|"CPU_INTENSITY"|"GPU_INTENSITY"|"GPU_CORE_INTENSITY"|"GPU_MEMORY_INTENSITY"|"NO_CUDA"|"NO_OPENCL"|"DISABLE_GPU_AMD"|"DISABLE_GPU_NVIDIA"|"DISABLE_GPU_INTEL"|"RETRY_COUNT"|"RETRY_DELAY_MS"|"CONNECT_TIMEOUT_MS"|"TLS_TIMEOUT_MS"|"REQUEST_TIMEOUT_MS"|"JOB_CHANNEL_SIZE"|"JOB_RECV_TIMEOUT_MS"|"STATS_INTERVAL_MS"|"SHARE_QUEUE_CAPACITY"|"SHARE_SUBMIT_RATE"|"SHARE_SUBMIT_BURST"|"RECENT_JOB_MAX_IDS"|"RECENT_JOB_MAX_AGE_MS"|"GPU_CPU_VERIFY"|"GPU_OPENCL_MAD_ENABLE"|"GPU_OPENCL_NATIVE_MATH_ENABLE"|"GPU_OPENCL_ACCURACY_BOOST"|"GPU_STRICT_JOB"|"GPU_RECENT_JOB_MAX_IDS"|"GPU_RECENT_JOB_MAX_AGE_MS"|"GPU_STATUS_BOARD_INTERVAL_MS"|"HYBRID_CPU_RESERVE_MIN_CORES"|"HYBRID_CPU_RESERVE_MAX_CORES"|"HYBRID_CPU_RESERVE_GPU_THRESHOLD"|"CPU_ONLY_RESERVE_SYSTEM_CORE"|"CPU_ONLY_RESERVED_CORES"|"TASK_DRAIN_TIMEOUT_MS"|"SHUTDOWN_POLL_MS"|"RECONNECT_MIN_DELAY_MS"|"RECONNECT_BACKOFF_MAX_POWER"|"WORKER_IDLE_SLEEP_MS"|"WORKER_RECV_TIMEOUT_MS"|"WORKER_MAX_SLICE_MS"|"WORKER_SLICE_CHECK_INTERVAL"|"WORKER_ACTIVE_POLL_INTERVAL"|"WORKER_STATS_FLUSH_THRESHOLD"|"WORKER_STATS_FLUSH_INTERVAL_MS"|"CPU_BATCH_BASE"|"CPU_BATCH_MIN"|"CPU_BATCH_MAX"|"CPU_BATCH_SIZE"|"GPU_BATCH_BASE"|"GPU_BATCH_MIN"|"GPU_BATCH_MAX"|"OPENCL_BATCH_SIZE"|"OPENCL_LOCAL_WORK_SIZE"|"AUTOLYKOS_BLOCK_SIZE"|"OPENCL_AUTOTUNE"|"CUDA_BATCH_SIZE"|"CUDA_BLOCK_SIZE"|"CUDA_AUTOTUNE"|"CPU_AUTOTUNE"|"CPU_AUTOTUNE_PROBE_MS"|"GPU_AUTOTUNE_ROUNDS"|"HIVE_STATS_PATH"|"HIVE_STATS_DISABLED"|"HIVE_PATH"|"HIVE_DISABLED")
+    "POOL"|"TEMPLATE"|"USER"|"WALLET"|"WORKER"|"WORKER_NAME"|"PASS"|"PASSWORD"|"PSW"|"PROTO"|"PROTO_FALLBACK"|"STRATUM_PROTOCOL_FALLBACK"|"TRANSPORT"|"ALGO"|"COIN"|"HASH"|"RANDOMX_HUGEPAGES"|"RANDOMX_MSR"|"CPU_COIN"|"CPU_HASH"|"GPU_COIN"|"GPU_HASH"|"GPU_CORE_COIN"|"GPU_CORE_HASH"|"GPU_MEMORY_COIN"|"GPU_MEMORY_HASH"|"CPU_POOL"|"CPU_FAILOVER_POOLS"|"CPU_PROTO"|"CPU_STRATUM_PROTOCOL"|"CPU_USER"|"CPU_PASSWORD"|"CPU_WALLET"|"GPU_POOL"|"GPU_FAILOVER_POOLS"|"GPU_PROTO"|"GPU_STRATUM_PROTOCOL"|"GPU_USER"|"GPU_PASSWORD"|"GPU_WALLET"|"GPU_CORE_POOL"|"GPU_CORE_FAILOVER_POOLS"|"GPU_CORE_PROTO"|"GPU_CORE_STRATUM_PROTOCOL"|"GPU_CORE_USER"|"GPU_CORE_PASSWORD"|"GPU_CORE_WALLET"|"GPU_MEMORY_POOL"|"GPU_MEMORY_FAILOVER_POOLS"|"GPU_MEMORY_PROTO"|"GPU_MEMORY_STRATUM_PROTOCOL"|"GPU_MEMORY_USER"|"GPU_MEMORY_PASSWORD"|"GPU_MEMORY_WALLET"|"API_BIND"|"API_PORT"|"API_TOKEN"|"FRONTEND_BIND"|"FRONTEND_PORT"|"FRONTEND_DISABLED"|"FRONTEND_LOGS_DISABLED"|"FRONTEND_PASSWORD_ENABLED"|"FRONTEND_PASSWORD"|"FRONTEND_RATE_LIMIT_PER_MINUTE"|"BENCH_REPORT"|"BENCH_REPORT_INTERVAL_SEC"|"BENCH_REPORT_ID_FILE"|"BENCH_REPORT_API_KEY"|"BENCH_INSIGHTS"|"NO_CPU"|"NO_GPU"|"GPU_DEVICES"|"CUDA_DEVICES"|"OPENCL_DEVICES"|"GPU_BACKEND"|"CUDA_EXPERIMENTAL"|"INTENSITY"|"INTENSITY_MIN"|"INTENSITY_MAX"|"CPU_INTENSITY"|"GPU_INTENSITY"|"GPU_CORE_INTENSITY"|"GPU_MEMORY_INTENSITY"|"NO_CUDA"|"NO_OPENCL"|"DISABLE_GPU_AMD"|"DISABLE_GPU_NVIDIA"|"DISABLE_GPU_INTEL"|"RETRY_COUNT"|"RETRY_DELAY_MS"|"CONNECT_TIMEOUT_MS"|"TLS_TIMEOUT_MS"|"REQUEST_TIMEOUT_MS"|"JOB_CHANNEL_SIZE"|"JOB_RECV_TIMEOUT_MS"|"STATS_INTERVAL_MS"|"SHARE_QUEUE_CAPACITY"|"SHARE_SUBMIT_RATE"|"SHARE_SUBMIT_BURST"|"RECENT_JOB_MAX_IDS"|"RECENT_JOB_MAX_AGE_MS"|"GPU_CPU_VERIFY"|"GPU_OPENCL_MAD_ENABLE"|"GPU_OPENCL_NATIVE_MATH_ENABLE"|"GPU_OPENCL_ACCURACY_BOOST"|"GPU_STRICT_JOB"|"GPU_RECENT_JOB_MAX_IDS"|"GPU_RECENT_JOB_MAX_AGE_MS"|"GPU_STATUS_BOARD_INTERVAL_MS"|"HYBRID_CPU_RESERVE_MIN_CORES"|"HYBRID_CPU_RESERVE_MAX_CORES"|"HYBRID_CPU_RESERVE_GPU_THRESHOLD"|"CPU_ONLY_RESERVE_SYSTEM_CORE"|"CPU_ONLY_RESERVED_CORES"|"TASK_DRAIN_TIMEOUT_MS"|"SHUTDOWN_POLL_MS"|"RECONNECT_MIN_DELAY_MS"|"RECONNECT_BACKOFF_MAX_POWER"|"WORKER_IDLE_SLEEP_MS"|"WORKER_RECV_TIMEOUT_MS"|"WORKER_MAX_SLICE_MS"|"WORKER_SLICE_CHECK_INTERVAL"|"WORKER_ACTIVE_POLL_INTERVAL"|"WORKER_STATS_FLUSH_THRESHOLD"|"WORKER_STATS_FLUSH_INTERVAL_MS"|"CPU_BATCH_BASE"|"CPU_BATCH_MIN"|"CPU_BATCH_MAX"|"CPU_BATCH_SIZE"|"GPU_BATCH_BASE"|"GPU_BATCH_MIN"|"GPU_BATCH_MAX"|"OPENCL_BATCH_SIZE"|"OPENCL_LOCAL_WORK_SIZE"|"AUTOLYKOS_BLOCK_SIZE"|"OPENCL_AUTOTUNE"|"CUDA_BATCH_SIZE"|"CUDA_BLOCK_SIZE"|"CUDA_AUTOTUNE"|"CPU_AUTOTUNE"|"CPU_AUTOTUNE_PROBE_MS"|"GPU_AUTOTUNE_ROUNDS"|"HIVE_STATS_PATH"|"HIVE_STATS_DISABLED"|"HIVE_PATH"|"HIVE_DISABLED")
       return 0
       ;;
     *)
@@ -81,10 +224,25 @@ is_known_csv_key() {
   esac
 }
 
-safe_csv="${CUSTOM_URL:-}"
+custom_url_raw="$(resolve_hive_macros "${CUSTOM_URL:-}")"
+custom_user_config_raw="$(resolve_hive_macros "${CUSTOM_USER_CONFIG:-}")"
+custom_pool_url_raw="$(resolve_hive_macros "$(first_non_empty "${CUSTOM_POOL_URL:-}" "${CUSTOM_POOL:-}" "${POOL_URL:-}" "${URL:-}" || true)")"
+custom_pool_url_from_host_port="$(build_pool_url_from_host_port "$(first_non_empty "${CUSTOM_POOL_HOST:-}" "${POOL_HOST:-}" "${URL_HOST:-}" || true)" "$(first_non_empty "${CUSTOM_POOL_PORT:-}" "${POOL_PORT:-}" "${URL_PORT:-}" || true)")"
+
+safe_csv="${custom_url_raw}"
+if [[ -n "${custom_user_config_raw}" ]]; then
+  if [[ -n "${safe_csv}" ]]; then
+    safe_csv="${safe_csv},${custom_user_config_raw}"
+  else
+    safe_csv="${custom_user_config_raw}"
+  fi
+fi
+
 pool_url="$(kv_from_csv "${safe_csv}" "POOL" || true)"
 template_from_url="$(kv_from_csv "${safe_csv}" "TEMPLATE" || true)"
-pass_from_url="$(kv_from_csv "${safe_csv}" "PASS" || true)"
+user_from_url="$(kv_from_csv "${safe_csv}" "USER" || true)"
+wallet_from_url="$(kv_from_csv "${safe_csv}" "WALLET" || true)"
+pass_from_url="$(first_non_empty "$(kv_from_csv "${safe_csv}" "PASS" || true)" "$(kv_from_csv "${safe_csv}" "PASSWORD" || true)" "$(kv_from_csv "${safe_csv}" "PSW" || true)" || true)"
 proto_from_url="$(kv_from_csv "${safe_csv}" "PROTO" || true)"
 proto_fallback_from_url="$(kv_from_csv "${safe_csv}" "PROTO_FALLBACK" || true)"
 stratum_protocol_fallback_from_url="$(kv_from_csv "${safe_csv}" "STRATUM_PROTOCOL_FALLBACK" || true)"
@@ -130,7 +288,7 @@ gpu_memory_stratum_protocol_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_ST
 gpu_memory_user_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_USER" || true)"
 gpu_memory_password_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_PASSWORD" || true)"
 gpu_memory_wallet_from_url="$(kv_from_csv "${safe_csv}" "GPU_MEMORY_WALLET" || true)"
-worker_from_url="$(kv_from_csv "${safe_csv}" "WORKER" || true)"
+worker_from_url="$(first_non_empty "$(kv_from_csv "${safe_csv}" "WORKER" || true)" "$(kv_from_csv "${safe_csv}" "WORKER_NAME" || true)" || true)"
 api_bind_from_url="$(kv_from_csv "${safe_csv}" "API_BIND" || true)"
 api_port_from_url="$(kv_from_csv "${safe_csv}" "API_PORT" || true)"
 api_token_from_url="$(kv_from_csv "${safe_csv}" "API_TOKEN" || true)"
@@ -233,22 +391,27 @@ if [[ -z "${hive_stats_disabled_from_url}" ]]; then
 fi
 
 if [[ -z "${pool_url}" ]]; then
-  pool_url="$(trim "${safe_csv}")"
+  pool_url="$(first_non_empty "${custom_pool_url_raw}" "${custom_pool_url_from_host_port}" "$(trim "${custom_url_raw}")")" || true
 fi
 
 if [[ -z "${pool_url}" ]]; then
-  echo "CUSTOM_URL/POOL is empty; cannot build miner config" >&2
+  echo "Pool URL is empty; set CUSTOM_URL, POOL:... in CUSTOM_USER_CONFIG, or a direct HiveOS pool field such as CUSTOM_POOL_URL/URL." >&2
   exit 1
 fi
 
-pool_user="${CUSTOM_TEMPLATE:-${template_from_url:-}}"
+custom_template_value="$(normalize_hive_optional_value "$(resolve_hive_macros "${CUSTOM_TEMPLATE:-}")")"
+template_from_url="$(normalize_hive_optional_value "${template_from_url:-}")"
+user_from_url="$(normalize_hive_optional_value "${user_from_url:-}")"
+wallet_from_url="$(normalize_hive_optional_value "${wallet_from_url:-}")"
+
+pool_user="$(first_non_empty "${custom_template_value:-}" "${template_from_url:-}" "${user_from_url:-}" "${wallet_from_url:-}" "${CUSTOM_WALLET:-}" "${WAL:-}" "${WALLET:-}" || true)"
 worker_name="${worker_from_url:-${WORKER_NAME:-worker}}"
 
 if [[ -z "${pool_user}" ]]; then
   pool_user="${worker_name}"
 fi
 
-pool_pass="${CUSTOM_PASS:-${pass_from_url:-x}}"
+pool_pass="$(first_non_empty "${CUSTOM_PASS:-}" "${pass_from_url:-}" "${CUSTOM_PASSWORD:-}" "${PASS:-}" "x" || true)"
 stratum_protocol="${CUSTOM_STRATUM_PROTOCOL:-${proto_from_url:-v1}}"
 stratum_protocol_fallback="${CUSTOM_STRATUM_PROTOCOL_FALLBACK:-${stratum_protocol_fallback_from_url:-${proto_fallback_from_url:-}}}"
 stratum_transport="${CUSTOM_STRATUM_TRANSPORT:-${transport_from_url:-auto}}"
@@ -289,7 +452,7 @@ gpu_memory_stratum_protocol="${CUSTOM_GPU_MEMORY_STRATUM_PROTOCOL:-${gpu_memory_
 gpu_memory_user="${CUSTOM_GPU_MEMORY_USER:-${gpu_memory_user_from_url:-}}"
 gpu_memory_password="${CUSTOM_GPU_MEMORY_PASSWORD:-${gpu_memory_password_from_url:-}}"
 gpu_memory_wallet="${CUSTOM_GPU_MEMORY_WALLET:-${gpu_memory_wallet_from_url:-}}"
-extra_args="${CUSTOM_USER_CONFIG:-}"
+extra_args="$(extract_cli_extra_args "${custom_user_config_raw}")"
 api_bind="${CUSTOM_API_BIND:-${api_bind_from_url:-127.0.0.1}}"
 api_port="${CUSTOM_API_PORT:-${api_port_from_url:-48673}}"
 api_token="${CUSTOM_API_TOKEN:-${api_token_from_url:-}}"
@@ -506,8 +669,6 @@ normalize_optional_hash() {
   canonical_hash "${raw}"
 }
 
-# Promote selected HiveOS "Extra config arguments" so validation matches
-# the final miner command users see in the UI.
 apply_cli_extra_arg_overrides() {
   local -a parts=()
   local index=0
@@ -522,7 +683,6 @@ apply_cli_extra_arg_overrides() {
   normalized_extra_args="${extra_args//$'\r'/ }"
   normalized_extra_args="${normalized_extra_args//$'\n'/ }"
 
-  # HiveOS may provide one CLI arg per line in the UI.
   read -r -a parts <<< "${normalized_extra_args}"
 
   while (( index < ${#parts[@]} )); do
