@@ -8,6 +8,19 @@ if [[ -f "${SCRIPT_DIR}/mmp-external.conf" ]]; then
   source "${SCRIPT_DIR}/mmp-external.conf"
 fi
 
+trim() {
+  local value="${1:-}"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "${value}"
+}
+
+trim_named_var() {
+  local name="$1"
+  local value="${!name-}"
+  printf -v "${name}" '%s' "$(trim "${value}")"
+}
+
 EXTERNAL_NAME="${EXTERNAL_NAME:-cryptis-miner}"
 EXTERNAL_VERSION="${EXTERNAL_VERSION:-1.0.1}"
 
@@ -65,6 +78,20 @@ gpu_memory_wallet_env="${GPU_MEMORY_WALLET:-}"
 gpu_core_intensity_env="${GPU_CORE_INTENSITY:-}"
 gpu_memory_intensity_env="${GPU_MEMORY_INTENSITY:-}"
 passthrough=()
+
+for scalar_var in \
+  MINER_BIN \
+  pool_raw pool_user api_bind api_port hive_stats_path api_token frontend_bind frontend_port worker_name \
+  stratum_protocol_env stratum_transport_env stratum_protocol_fallback_env \
+  cpu_stratum_protocol_env gpu_stratum_protocol_env \
+  cpu_coin_env cpu_hash_env gpu_coin_env gpu_hash_env gpu_backend_env cuda_devices_env opencl_devices_env \
+  no_cuda_env no_opencl_env cuda_experimental_env \
+  gpu_core_coin_env gpu_core_hash_env gpu_memory_coin_env gpu_memory_hash_env \
+  gpu_core_pool_env gpu_core_failover_pools_env gpu_core_stratum_protocol_env gpu_core_user_env gpu_core_wallet_env \
+  gpu_memory_pool_env gpu_memory_failover_pools_env gpu_memory_stratum_protocol_env gpu_memory_user_env gpu_memory_wallet_env \
+  gpu_core_intensity_env gpu_memory_intensity_env; do
+  trim_named_var "${scalar_var}"
+done
 
 args=("$@")
 index=0
@@ -344,16 +371,20 @@ effective_gpu_hash="$(get_arg_value --gpu-hash || true)"
 if [[ -z "${effective_gpu_hash}" ]]; then
   effective_gpu_hash="${gpu_hash_env}"
 fi
+effective_gpu_hash="$(trim "${effective_gpu_hash}")"
 effective_gpu_core_hash="$(get_arg_value --gpu-core-hash || true)"
 if [[ -z "${effective_gpu_core_hash}" ]]; then
   effective_gpu_core_hash="${gpu_core_hash_env}"
 fi
+effective_gpu_core_hash="$(trim "${effective_gpu_core_hash}")"
 effective_gpu_memory_hash="$(get_arg_value --gpu-memory-hash || true)"
 if [[ -z "${effective_gpu_memory_hash}" ]]; then
   effective_gpu_memory_hash="${gpu_memory_hash_env}"
 fi
+effective_gpu_memory_hash="$(trim "${effective_gpu_memory_hash}")"
 if [[ -n "${effective_gpu_memory_hash}" ]]; then
   lane_core_hash="${effective_gpu_core_hash:-${effective_gpu_hash:-$(get_arg_value --hash || true)}}"
+  lane_core_hash="$(trim "${lane_core_hash}")"
   lane_core_hash="${lane_core_hash,,}"
   lane_memory_hash="${effective_gpu_memory_hash,,}"
   if [[ "${lane_memory_hash}" != "autolykosv2" || ( "${lane_core_hash}" != "ox8" && "${lane_core_hash}" != "hoohash" ) ]]; then
