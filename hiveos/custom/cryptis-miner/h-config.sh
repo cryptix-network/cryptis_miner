@@ -12,6 +12,19 @@ trim() {
   printf '%s' "${value}"
 }
 
+trim_named_var() {
+  local name="$1"
+  local value="${!name-}"
+  printf -v "${name}" '%s' "$(trim "${value}")"
+}
+
+normalize_extra_args() {
+  local value="${1:-}"
+  value="${value//$'\r'/ }"
+  value="${value//$'\n'/ }"
+  printf '%s' "$(trim "${value}")"
+}
+
 kv_from_csv() {
   local csv="$1"
   local key="$2"
@@ -239,9 +252,9 @@ pool_pass="${CUSTOM_PASS:-${pass_from_url:-x}}"
 stratum_protocol="${CUSTOM_STRATUM_PROTOCOL:-${proto_from_url:-v1}}"
 stratum_protocol_fallback="${CUSTOM_STRATUM_PROTOCOL_FALLBACK:-${stratum_protocol_fallback_from_url:-${proto_fallback_from_url:-}}}"
 stratum_transport="${CUSTOM_STRATUM_TRANSPORT:-${transport_from_url:-auto}}"
-algorithm="${CUSTOM_ALGO:-${algo_from_url:-}}"
-coin="${CUSTOM_COIN:-${coin_from_url:-}}"
-hash_name="${CUSTOM_HASH:-${hash_from_url:-}}"
+algorithm="$(trim "${CUSTOM_ALGO:-${algo_from_url:-}}")"
+coin="$(trim "${CUSTOM_COIN:-${coin_from_url:-}}")"
+hash_name="$(trim "${CUSTOM_HASH:-${hash_from_url:-}}")"
 randomx_hugepages="${CUSTOM_RANDOMX_HUGEPAGES:-${randomx_hugepages_from_url:-}}"
 randomx_msr="${CUSTOM_RANDOMX_MSR:-${randomx_msr_from_url:-}}"
 cpu_coin="${CUSTOM_CPU_COIN:-${cpu_coin_from_url:-}}"
@@ -367,6 +380,43 @@ cpu_autotune_probe_ms="${CUSTOM_CPU_AUTOTUNE_PROBE_MS:-${cpu_autotune_probe_ms_f
 gpu_autotune_rounds="${CUSTOM_GPU_AUTOTUNE_ROUNDS:-${gpu_autotune_rounds_from_url:-}}"
 hive_stats_path="${CUSTOM_HIVE_STATS_PATH:-${hive_stats_path_from_url:-/hiveos/stats}}"
 hive_stats_disabled="${CUSTOM_HIVE_STATS_DISABLED:-${hive_stats_disabled_from_url:-0}}"
+
+for scalar_var in \
+  pool_url pool_user worker_name \
+  stratum_protocol stratum_protocol_fallback stratum_transport \
+  algorithm coin hash_name \
+  randomx_hugepages randomx_msr \
+  cpu_coin cpu_hash gpu_coin gpu_hash gpu_core_coin gpu_core_hash gpu_memory_coin gpu_memory_hash \
+  cpu_pool cpu_stratum_protocol cpu_user cpu_wallet \
+  gpu_pool gpu_stratum_protocol gpu_user gpu_wallet \
+  gpu_core_pool gpu_core_stratum_protocol gpu_core_user gpu_core_wallet \
+  gpu_memory_pool gpu_memory_stratum_protocol gpu_memory_user gpu_memory_wallet \
+  api_bind api_port \
+  frontend_bind frontend_port frontend_password_enabled frontend_rate_limit_per_minute \
+  bench_report bench_report_interval_sec bench_report_id_file bench_insights \
+  no_cpu no_gpu gpu_devices cuda_devices opencl_devices gpu_backend cuda_experimental \
+  intensity intensity_min intensity_max cpu_intensity gpu_intensity gpu_core_intensity gpu_memory_intensity \
+  no_cuda no_opencl disable_gpu_amd disable_gpu_nvidia disable_gpu_intel \
+  pool_retry_count pool_retry_delay_ms pool_connect_timeout_ms pool_tls_timeout_ms pool_request_timeout_ms pool_job_channel_size \
+  job_recv_timeout_ms stats_interval_ms share_queue_capacity share_submit_rate share_submit_burst \
+  recent_job_max_ids recent_job_max_age_ms \
+  gpu_cpu_verify gpu_opencl_mad_enable gpu_opencl_native_math_enable gpu_opencl_accuracy_boost gpu_strict_job \
+  gpu_recent_job_max_ids gpu_recent_job_max_age_ms gpu_status_board_interval_ms \
+  hybrid_cpu_reserve_min_cores hybrid_cpu_reserve_max_cores hybrid_cpu_reserve_gpu_threshold \
+  cpu_only_reserve_system_core cpu_only_reserved_cores \
+  task_drain_timeout_ms shutdown_poll_ms reconnect_min_delay_ms reconnect_backoff_max_power \
+  worker_idle_sleep_ms worker_recv_timeout_ms worker_max_slice_ms worker_slice_check_interval worker_active_poll_interval \
+  worker_stats_flush_threshold worker_stats_flush_interval_ms \
+  cpu_batch_base cpu_batch_min cpu_batch_max cpu_batch_size \
+  gpu_batch_base gpu_batch_min gpu_batch_max \
+  opencl_batch_size opencl_local_work_size autolykos_block_size opencl_autotune \
+  cuda_batch_size cuda_block_size cuda_autotune \
+  cpu_autotune cpu_autotune_probe_ms gpu_autotune_rounds \
+  hive_stats_path hive_stats_disabled; do
+  trim_named_var "${scalar_var}"
+done
+
+extra_args="$(normalize_extra_args "${extra_args}")"
 
 normalize_lower() {
   printf '%s' "$1" | tr '[:upper:]' '[:lower:]'
@@ -661,7 +711,7 @@ apply_cli_extra_arg_overrides() {
 apply_cli_extra_arg_overrides
 
 if [[ -z "${coin}" || -z "${hash_name}" ]]; then
-  case "$(normalize_lower "${algorithm}")" in
+  case "$(normalize_lower "$(trim "${algorithm}")")" in
     ""|"cryptix"|"cryptix-ox8"|"cryptixox8"|"cryptix+ox8"|"ox8")
       coin="${coin:-cryptix}"
       hash_name="${hash_name:-ox8}"
